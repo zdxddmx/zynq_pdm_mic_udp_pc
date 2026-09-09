@@ -1,55 +1,101 @@
-# 47_pdm_mic_udp_pc
+# 基于 ZYNQ 的 PDM 麦克风阵列 UDP 音频流系统
 
-UDP audio streaming project for the PDM microphone.
+> 在 Xilinx Zynq-7020 FPGA 上实现 PDM 数字麦克风采集 → CIC 抽取滤波 → 千兆以太网 UDP 实时音频流传输，配套 Python 上位机接收并显示波形。
 
-Current FPGA behavior:
+## 技术栈
 
-- Top module: `ad_udp_pc`
-- Board IP: `192.168.1.10`
-- PC IP default in RTL: `192.168.1.102`
-- UDP port: `1234`
-- Start command: one UDP byte `0x01`
-- Stop command: one UDP byte `0x00`
-- Payload: raw little-endian signed PCM16
-- Packet size: 1200 bytes, 600 samples
-- PDM clock pin: `W19`, output `mic_clk`
-- PDM data pin: `Y17`, input `mic_data`
-- PDM clock: about 2.083 MHz from 50 MHz / 24
-- Decimation: 64
-- PCM sample rate: about 32.55 kHz
-- Source select: `USE_FAKE_AUDIO = 0` uses the microphone, `USE_FAKE_AUDIO = 1` uses the internal triangle wave
-- Auto stream: `AUTO_STREAM = 1` starts UDP streaming after reset without waiting for a start command
-- PDM sample phase: `MIC_SAMPLE_ON_HIGH = 1` samples DATA during the high half of `mic_clk`; set to `0` to try the other half-cycle
-- PDM density diagnostic: `MIC_OUTPUT_DENSITY = 1` streams raw PDM one-density per 64-bit block instead of CIC-filtered audio
-- LED0 `H15`: heartbeat, toggles when the FPGA design and PLL are running
-- LED1 `L15`: lights briefly when `mic_data` on `Y17` has any detected edge
+| 分类 | 技术 | 说明 |
+|---|---|---|
+| **FPGA 芯片** | Xilinx Zynq-7020（`xc7z020clg400-2`） | 本项目仅使用 PL 逻辑，未启用 PS |
+| **开发语言** | Verilog HDL | 全部 RTL 手写，无 HLS |
+| **开发工具** | Vivado 2020.2 | 综合 / 实现 / 烧录 |
+| **仿真工具** | ModelSim | UDP 收发链路功能仿真（`sim/tb/tb_udp.v`） |
+| **FPGA IP 核** | `async_fifo_2048x8b`、`clk_wiz_0` | 异步 FIFO 数据缓冲 + 时钟向导 |
+| **网络协议** | 以太网 MAC（RGMII）/ ARP / UDP / IPv4 | 轻量协议栈全手写，无软核 CPU |
+| **数字信号处理** | PDM 解调 + CIC 抽取滤波器 | 64 倍抽取，含可调移位增益 |
+| **上位机** | Python 3（纯标准库：`argparse`/`socket`） | UDP 接收 + 波形显示 |
+| **约束文件** | XDC（LVCMOS33） | 麦克风 IO：`W19`/`Y17`；LED：`H15`/`L15` |
 
-Run the PC viewer:
+## 系统架构
+
+```
+PDM 麦克风 ──mic_clk/mic_data──> pdm_mic_pcm ──PCM16──> ad_udp_pc(TOP)
+   (W19/Y17)     2.083 MHz       (CIC 64x 抽取)            │
+                                                           │
+                    ┌──────────────────────────────────────┤
+                    │                                      │
+              async_fifo_2048x8b                     eth_top (MAC)
+                    │                                      │
+              udp_tx (组包/发 UDP)                    gmii_to_rgmii
+                    └─────────────┬────────────────────────┘
+                                  │
+                          千兆以太网 PHY (RGMII)
+                                  │
+                           PC 上位机 udp_wave_viewer.py
+```
+
+- **发送链路**：`udp_tx` 按 1200 字节/包组包（600 个 PCM16 采样点），经 `eth_top` 完成 MAC 封装、`arp` 模块完成 ARP 解析、`gmii_to_rgmii` 驱动 PHY。
+- **接收链路**：`udp_rx`/`arp_rx` 解析上位机下发的开始（`0x01`）/停止（`0x00`）命令，`start_transfer_ctrl` 控制采集启停。
+- **调试辅助**：`fake_audio_gen` 内部三角波源、`ad1030_10bit_to_16bit` 外部 10-bit ADC 通路、`MIC_OUTPUT_DENSITY` PDM 密度诊断模式。
+
+## 关键参数
+
+| 参数 | 值 |
+|---|---|
+| 板卡 IP | `192.168.1.10`（PC：`192.168.1.102`） |
+| UDP 端口 | `1234` |
+| 本地 MAC | `48'h0123456789ab` |
+| PDM 时钟 | 2.083 MHz（50 MHz / 24） |
+| CIC 抽取比 | 64 |
+| PCM 采样率 | ≈ 32.55 kHz |
+| PCM 格式 | 16-bit 有符号小端 |
+| 包格式 | 1200 字节 / 包（600 采样点） |
+| 启动/停止命令 | UDP 单字节 `0x01` / `0x00` |
+| 编译选项 | `USE_FAKE_AUDIO`、`AUTO_STREAM`、`MIC_SAMPLE_ON_HIGH`、`MIC_OUTPUT_DENSITY` |
+
+## 目录结构
+
+```
+├── rtl/                      # Verilog 源码
+│   ├── ad_udp_pc.v           # 顶层模块
+│   ├── eth_top.v / eth_ctrl.v# 以太网 MAC 控制
+│   ├── pdm_mic_pcm.v         # PDM 解码 + CIC 滤波
+│   ├── fake_audio_gen.v      # 内部测试波形源
+│   ├── ad1030_10bit_to_16bit.v # 10-bit ADC 数据扩展
+│   ├── img_data_pkt.v        # 图像数据打包（预留）
+│   ├── start_transfer_ctrl.v # 启停控制
+│   ├── arp/                  # ARP 协议（rx/tx + CRC32）
+│   ├── gmii_to_rgmii/        # GMII↔RGMII 转换
+│   └── udp/                  # UDP 协议（rx/tx）
+├── prj/                      # Vivado 工程（仅 .xpr + srcs，生成目录已忽略）
+├── sim/tb/                   # ModelSim 仿真 testbench
+├── pc/udp_wave_viewer.py     # Python 上位机
+├── doc/ad_eth_pc.vsdx        # 系统架构图（Visio）
+└── README.md
+```
+
+## 快速上手
+
+### 构建 FPGA 工程
+
+1. Vivado 2020.2 打开 `prj/ad_udp_pc.xpr`
+2. Generate Bitstream（IP 会自动重新生成）
+3. 烧录 bit 流
+
+### 运行上位机
 
 ```powershell
 cd pc
 python .\udp_wave_viewer.py --board-ip 192.168.1.10 --listen-port 1234 --sample-rate 32550
 ```
 
-If the waveform is clipped or too small, adjust `CIC_SHIFT` in `rtl/ad_udp_pc.v` where `pdm_mic_pcm` is instantiated.
+### 故障排查
 
-Quick diagnostic:
+- 上位机显示 `packets=0`：先把 `USE_FAKE_AUDIO` 置 1 验证以太网通路，再切回麦克风；
+- `USE_FAKE_AUDIO=1` 正常但真麦克风无波形：置 `MIC_OUTPUT_DENSITY=1` 观察 PDM 密度——平线说明 `mic_data` 引脚悬空/焊错/麦克风未供电；
+- 波形削顶或过小：调整 `rtl/ad_udp_pc.v` 中 `CIC_SHIFT`；
+- 时钟异常：量测 `W19` 应为 2.083 MHz；LED0（`H15`）心跳表示 PLL 正常。
 
-- If the PC viewer shows `packets=0`, set `USE_FAKE_AUDIO` to `1`, regenerate the bitstream, and test the Ethernet path again.
-- With `AUTO_STREAM=1`, `packets=0` is not caused by the PC start command being missed.
-- If `USE_FAKE_AUDIO=1` works but `USE_FAKE_AUDIO=0` does not show an audio waveform, set `MIC_OUTPUT_DENSITY=1` and regenerate the bitstream.
-- In density mode, a working PDM input should move when you speak or tap near the microphone. A flat line near either extreme usually means `mic_data` is stuck high/low, floating, wrong pin, no microphone power, or a soldering problem.
-- If density mode moves but CIC audio does not, try `MIC_SAMPLE_ON_HIGH=0`, then adjust `CIC_SHIFT`.
-- Check `mic_clk` on `W19`, `mic_data` on `Y17`, microphone power, and IO voltage.
+## 安全说明
 
-Hardware debug checklist:
-
-1. LED0 toggles: FPGA design is alive. If not, check bitstream download, reset, and clock.
-2. Measure `W19`: should be about 2.083 MHz. If not, the microphone clock is not reaching the pin.
-3. LED1 lights or flickers: FPGA sees transitions on `Y17`. If LED1 never lights while LED0 is alive, `mic_data` is stuck, floating, on the wrong pin, unpowered, or not soldered.
-4. In `MIC_OUTPUT_DENSITY=1`, the PC waveform should move if `Y17` receives real PDM data.
-
-Important hardware note:
-
-- The XDC currently uses `LVCMOS33` for `mic_clk` and `mic_data`.
-- Confirm the microphone supply and IO voltage before powering it from the FPGA board.
+- 板卡/PC IP 为实验室调试网段配置，部署时按需修改 `rtl/ad_udp_pc.v`、`rtl/eth_top.v` 中的参数。
