@@ -1,0 +1,23 @@
+# Vivado 生成/缓存目录
+prj/.Xil/
+prj/*.cache/
+prj/*.gen/
+prj/*.runs/
+prj/*.hw/
+prj/*.ip_user_files/
+prj/*.sim/
+prj/vivado*.jou
+prj/vivado*.log
+prj/vivado*.str
+
+# 仿真工作目录
+sim/work/
+
+# Python
+pc/.idea/
+__pycache__/
+*.pyc
+
+# 日志
+*.jou
+*.log
