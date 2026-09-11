@@ -3,7 +3,7 @@
 <!--                                                         -->
 <!-- Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.   -->
 
-<Project Version="7" Minor="54" Path="C:/Users/29229/Desktop/ZYNQ_7020_FPGA/47_pdm_mic_udp_pc/prj/ad_udp_pc.xpr">
+<Project Version="7" Minor="54" Path="prj/ad_udp_pc.xpr">
   <DefaultLaunch Dir="$PRUNDIR"/>
   <Configuration>
     <Option Name="Id" Val="d7e778af92e3400e98398e824b47d24d"/>
