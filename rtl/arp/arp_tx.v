@@ -1,46 +1,46 @@
 //****************************************Copyright (c)***********************************//
-//Ô­×Ó¸çÔÚÏß½ÌÑ§Æ½Ì¨£ºwww.yuanzige.com
-//¼¼ÊõÖ§³Ö£ºhttp://www.openedv.com/forum.php
-//ÌÔ±¦µêÆÌ£ºhttps://zhengdianyuanzi.tmall.com
-//¹Ø×¢Î¢ĞÅ¹«ÖÚÆ½Ì¨Î¢ĞÅºÅ£º"ÕıµãÔ­×Ó"£¬Ãâ·Ñ»ñÈ¡ZYNQ & FPGA & STM32 & LINUX×ÊÁÏ¡£
-//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ÕıµãÔ­×Ó 2023-2033
+//åŸå­å“¥åœ¨çº¿æ•™å­¦å¹³å°ï¼šwww.yuanzige.com
+//æŠ€æœ¯æ”¯æŒï¼šhttp://www.openedv.com/forum.php
+//æ·˜å®åº—é“ºï¼šhttps://zhengdianyuanzi.tmall.com
+//å…³æ³¨å¾®ä¿¡å…¬ä¼—å¹³å°å¾®ä¿¡å·ï¼š"æ­£ç‚¹åŸå­"ï¼Œå…è´¹è·å–ZYNQ & FPGA & STM32 & LINUXèµ„æ–™ã€‚
+//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
+//Copyright(C) æ­£ç‚¹åŸå­ 2023-2033
 //All rights reserved
 //----------------------------------------------------------------------------------------
 // File name:           arp_tx
-// Created by:          ÕıµãÔ­×Ó
-// Created date:        2025Äê10ÔÂ13ÈÕ09:40:02
+// Created by:          æ­£ç‚¹åŸå­
+// Created date:        2025å¹´10æœˆ13æ—¥09:40:02
 // Version:             V1.0
-// Descriptions:        arp·¢ËÍÄ£¿é
+// Descriptions:        arpå‘é€æ¨¡å—
 //
 //----------------------------------------------------------------------------------------
 //****************************************************************************************//
 
 module arp_tx(
-    input                  clk          , //Ê±ÖÓĞÅºÅ
-    input                  rst_n        , //¸´Î»ĞÅºÅ£¬µÍµçÆ½ÓĞĞ§
-    input                  arp_tx_en    , //ARP·¢ËÍÊ¹ÄÜĞÅºÅ
-    input                  arp_tx_type  , //ARPÊı¾İÀàĞÍ£¬0£ºARPÇëÇó 1£ºARPÓ¦´ğ
-    input        [47:0]    des_mac      , //Òª·¢ËÍµÄÄ¿µÄMACµØÖ· 
-    input        [31:0]    des_ip       , //Òª·¢ËÍµÄÄ¿µÄIPµØÖ· 
-    input        [23:0]    crc_data     , //CRCĞ£ÑéÊı¾İ£¨¼Ä´æÊä³öµÄ£©
-    input        [7:0]     crc_next     , //CRCĞ£ÑéÊı¾İ£¨×éºÏÂß¼­Êä³öµÄ£©
+    input                  clk          , //æ—¶é’Ÿä¿¡å·
+    input                  rst_n        , //å¤ä½ä¿¡å·ï¼Œä½ç”µå¹³æœ‰æ•ˆ
+    input                  arp_tx_en    , //ARPå‘é€ä½¿èƒ½ä¿¡å·
+    input                  arp_tx_type  , //ARPæ•°æ®ç±»å‹ï¼Œ0ï¼šARPè¯·æ±‚ 1ï¼šARPåº”ç­”
+    input        [47:0]    des_mac      , //è¦å‘é€çš„ç›®çš„MACåœ°å€ 
+    input        [31:0]    des_ip       , //è¦å‘é€çš„ç›®çš„IPåœ°å€ 
+    input        [23:0]    crc_data     , //CRCæ ¡éªŒæ•°æ®ï¼ˆå¯„å­˜è¾“å‡ºçš„ï¼‰
+    input        [7:0]     crc_next     , //CRCæ ¡éªŒæ•°æ®ï¼ˆç»„åˆé€»è¾‘è¾“å‡ºçš„ï¼‰
 
-    output  reg            gmii_tx_en   , //GMIIÊä³öÊı¾İÓĞĞ§ĞÅºÅ
-    output  reg  [7:0]     gmii_txd     , //GMIIÊä³öÊı¾İ
-    output  reg            tx_done      , //ÒÔÌ«Íø·¢ËÍÍê³ÉĞÅºÅ
-    output  reg            crc_en       , //CRC¿ªÊ¼Ğ£ÑéÊ¹ÄÜ
-    output  reg            crc_clr        //CRCÊı¾İ¸´Î»ĞÅºÅ
+    output  reg            gmii_tx_en   , //GMIIè¾“å‡ºæ•°æ®æœ‰æ•ˆä¿¡å·
+    output  reg  [7:0]     gmii_txd     , //GMIIè¾“å‡ºæ•°æ®
+    output  reg            tx_done      , //ä»¥å¤ªç½‘å‘é€å®Œæˆä¿¡å·
+    output  reg            crc_en       , //CRCå¼€å§‹æ ¡éªŒä½¿èƒ½
+    output  reg            crc_clr        //CRCæ•°æ®å¤ä½ä¿¡å·
     );
 
 //parameter define
-//¿ª·¢°åµÄMACµØÖ· 00-11-22-33-44-55
+//å¼€å‘æ¿çš„MACåœ°å€ 00-11-22-33-44-55
 parameter BOARD_MAC       = 48'h00_11_22_33_44_55;
-//¿ª·¢°åµÄIPµØÖ· 192.168.1.10
+//å¼€å‘æ¿çš„IPåœ°å€ 192.168.1.10
 parameter BOARD_IP        = {8'd192,8'd168,8'd1,8'd10};
-//Ä¬ÈÏÄ¿µÄMACµØÖ·
+//é»˜è®¤ç›®çš„MACåœ°å€
 parameter DES_MAC_DEFAULT = 48'hff_ff_ff_ff_ff_ff;
-//Ä¬ÈÏÄ¿µÄIPµØÖ·
+//é»˜è®¤ç›®çš„IPåœ°å€
 parameter DES_IP_DEFAULT  = {8'd192,8'd168,8'd1,8'd102};
 
 //localparam define
@@ -50,25 +50,25 @@ localparam st_eth_head = 5'b0_0100;
 localparam st_arp_data = 5'b0_1000; 
 localparam st_crc      = 5'b1_0000; 
 
-//ÒÔÌ«ÍøARPµÄĞ­ÒéÀàĞÍ
+//ä»¥å¤ªç½‘ARPçš„åè®®ç±»å‹
 localparam ETH_TYPE_ARP  = 16'h0806;
-//ÍøÂç½Ó¿ÚÓ²¼şÀàĞÍ£¬0x0001(ÒÔÌ«Íø)
+//ç½‘ç»œæ¥å£ç¡¬ä»¶ç±»å‹ï¼Œ0x0001(ä»¥å¤ªç½‘)
 localparam HW_TYPE       = 16'h0001;
-//ÒªÓ³ÉäµÄ¸ß²ãĞ­ÒéµØÖ·ÀàĞÍ£¬IPv4Îª0x0800
+//è¦æ˜ å°„çš„é«˜å±‚åè®®åœ°å€ç±»å‹ï¼ŒIPv4ä¸º0x0800
 localparam PROTOCOL_TYPE = 16'h0800;  
-//ÒÔÌ«ÍøÖ¡¸ñÊ½·¢ËÍÊı¾İµÄ×îÉÙ×Ö½ÚÊı
+//ä»¥å¤ªç½‘å¸§æ ¼å¼å‘é€æ•°æ®çš„æœ€å°‘å­—èŠ‚æ•°
 localparam MIN_DATA_NUM  = 6'd46;
 
 //reg define
 reg  [4:0]   cur_state      ;
 reg  [4:0]   next_state     ;
-reg          tx_en_d0       ;//arp_tx_enĞÅºÅÑÓÊ±
+reg          tx_en_d0       ;//arp_tx_enä¿¡å·å»¶æ—¶
 reg          tx_en_d1       ;
 reg          tx_en_d2       ;
 reg  [5:0]   tx_cnt         ;
-reg  [7:0]   preamble[7:0]  ;//Ç°µ¼Âë+SFD
-reg  [7:0]   eth_head[13:0] ;//ÒÔÌ«ÍøÊ×²¿
-reg  [7:0]   arp_data[27:0] ;//ARPÊı¾İ
+reg  [7:0]   preamble[7:0]  ;//å‰å¯¼ç +SFD
+reg  [7:0]   eth_head[13:0] ;//ä»¥å¤ªç½‘é¦–éƒ¨
+reg  [7:0]   arp_data[27:0] ;//ARPæ•°æ®
 reg          tx_done_t      ;
 
 //wire define
@@ -80,7 +80,7 @@ wire         pos_tx_en;
 
 assign pos_tx_en = ~tx_en_d2 & tx_en_d1;
 
-//¶Ôarp_tx_enĞÅºÅÑÓÊ±´òÅÄ,ÓÃÓÚ²Éarp_tx_enµÄÉÏÉıÑØ
+//å¯¹arp_tx_enä¿¡å·å»¶æ—¶æ‰“æ‹,ç”¨äºé‡‡arp_tx_ençš„ä¸Šå‡æ²¿
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         tx_en_d0 <= 1'b0;
@@ -94,7 +94,7 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-//µÚÒ»¶Î×´Ì¬»ú:Í¬²½Ê±ĞòÃèÊö×´Ì¬×ªÒÆ
+//ç¬¬ä¸€æ®µçŠ¶æ€æœº:åŒæ­¥æ—¶åºæè¿°çŠ¶æ€è½¬ç§»
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) 
         cur_state <= st_idle;
@@ -102,35 +102,35 @@ always @(posedge clk or negedge rst_n) begin
         cur_state <= next_state;
 end
 
-//µÚ¶ş¶Î×´Ì¬»ú:×éºÏÂß¼­ÅĞ¶Ï×´Ì¬×ªÒÆÌõ¼ş
+//ç¬¬äºŒæ®µçŠ¶æ€æœº:ç»„åˆé€»è¾‘åˆ¤æ–­çŠ¶æ€è½¬ç§»æ¡ä»¶
 always @(*) begin
     next_state = st_idle;
     case(cur_state)
-        st_idle : begin                     //¿ÕÏĞ×´Ì¬
+        st_idle : begin                     //ç©ºé—²çŠ¶æ€
             if(pos_tx_en)
                 next_state = st_preamble;
             else
                 next_state = st_idle;
         end
-        st_preamble : begin                 //·¢ËÍÇ°µ¼Âë+Ö¡ÆğÊ¼½ç¶¨·û
+        st_preamble : begin                 //å‘é€å‰å¯¼ç +å¸§èµ·å§‹ç•Œå®šç¬¦
             if(tx_cnt == 6'd7)
                 next_state = st_eth_head;
             else
                 next_state = st_preamble;
         end
-        st_eth_head : begin                 //·¢ËÍÒÔÌ«ÍøÊ×²¿
+        st_eth_head : begin                 //å‘é€ä»¥å¤ªç½‘é¦–éƒ¨
             if(tx_cnt == 6'd13)
                 next_state = st_arp_data;
             else
                 next_state = st_eth_head;
         end
-        st_arp_data : begin                 //·¢ËÍARPÊı¾İ
+        st_arp_data : begin                 //å‘é€ARPæ•°æ®
             if(tx_cnt == MIN_DATA_NUM - 6'd1)
                 next_state = st_crc;
             else
                 next_state = st_arp_data;
         end
-        st_crc : begin                      //·¢ËÍCRCĞ£ÑéÖµ
+        st_crc : begin                      //å‘é€CRCæ ¡éªŒå€¼
             if(tx_cnt == 6'd3)
                 next_state = st_idle;
             else
@@ -140,7 +140,7 @@ always @(*) begin
     endcase
 end
 
-//µÚÈı¶Î×´Ì¬»ú:¸ù¾İµ±Ç°×´Ì¬Éú³ÉÊä³ö
+//ç¬¬ä¸‰æ®µçŠ¶æ€æœº:æ ¹æ®å½“å‰çŠ¶æ€ç”Ÿæˆè¾“å‡º
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         tx_cnt     <= 5'd0;
@@ -149,8 +149,8 @@ always @(posedge clk or negedge rst_n) begin
         gmii_txd   <= 8'd0;
         crc_en     <= 1'b0;
 
-        //¶ÔÊı×é½øĞĞ³õÊ¼»¯
-        //¶ÔÇ°µ¼Âë+Ö¡ÆğÊ¼½ç¶¨·û³õÊ¼»¯
+        //å¯¹æ•°ç»„è¿›è¡Œåˆå§‹åŒ–
+        //å¯¹å‰å¯¼ç +å¸§èµ·å§‹ç•Œå®šç¬¦åˆå§‹åŒ–
         preamble[0]  <= 8'h55;
         preamble[1]  <= 8'h55;
         preamble[2]  <= 8'h55;
@@ -159,47 +159,47 @@ always @(posedge clk or negedge rst_n) begin
         preamble[5]  <= 8'h55;
         preamble[6]  <= 8'h55;
         preamble[7]  <= 8'hd5;
-        //¶ÔÒÔÌ«ÍøµÄÖ¡Í·½øĞĞ³õÊ¼»¯
-        eth_head[0]  <= DES_MAC_DEFAULT[47:40];  //Ä¿µÄMACµØÖ·
+        //å¯¹ä»¥å¤ªç½‘çš„å¸§å¤´è¿›è¡Œåˆå§‹åŒ–
+        eth_head[0]  <= DES_MAC_DEFAULT[47:40];  //ç›®çš„MACåœ°å€
         eth_head[1]  <= DES_MAC_DEFAULT[39:32];
         eth_head[2]  <= DES_MAC_DEFAULT[31:24];
         eth_head[3]  <= DES_MAC_DEFAULT[23:16];
         eth_head[4]  <= DES_MAC_DEFAULT[15:8];
         eth_head[5]  <= DES_MAC_DEFAULT[7:0];
-        eth_head[6]  <= BOARD_MAC[47:40];        //Ô´MACµØÖ·
+        eth_head[6]  <= BOARD_MAC[47:40];        //æºMACåœ°å€
         eth_head[7]  <= BOARD_MAC[39:32];
         eth_head[8]  <= BOARD_MAC[31:24];
         eth_head[9]  <= BOARD_MAC[23:16];
         eth_head[10] <= BOARD_MAC[15:8];
         eth_head[11] <= BOARD_MAC[7:0]; 
-        eth_head[12] <= ETH_TYPE_ARP[15:8];     //ÒÔÌ«ÍøÖ¡ÀàĞÍ
+        eth_head[12] <= ETH_TYPE_ARP[15:8];     //ä»¥å¤ªç½‘å¸§ç±»å‹
         eth_head[13] <= ETH_TYPE_ARP[7:0];
-        //¶ÔARPÊı¾İ½øĞĞ³õÊ¼»¯
-        arp_data[0]  <= HW_TYPE[15:8];           //Ó²¼şÀàĞÍ
+        //å¯¹ARPæ•°æ®è¿›è¡Œåˆå§‹åŒ–
+        arp_data[0]  <= HW_TYPE[15:8];           //ç¡¬ä»¶ç±»å‹
         arp_data[1]  <= HW_TYPE[7:0];
-        arp_data[2]  <= PROTOCOL_TYPE[15:8];     //ÉÏ²ãĞ­ÒéÀàĞÍ
+        arp_data[2]  <= PROTOCOL_TYPE[15:8];     //ä¸Šå±‚åè®®ç±»å‹
         arp_data[3]  <= PROTOCOL_TYPE[7:0];
-        arp_data[4]  <= 8'h6;                    //Ó²¼şµØÖ·³¤¶È,6
-        arp_data[5]  <= 8'h4;                    //Ğ­ÒéµØÖ·³¤¶È,4
-        arp_data[6]  <= 8'h00;                   //OP,²Ù×÷Âë 8'h01£ºARPÇëÇó 8'h02:ARPÓ¦´ğ
+        arp_data[4]  <= 8'h6;                    //ç¡¬ä»¶åœ°å€é•¿åº¦,6
+        arp_data[5]  <= 8'h4;                    //åè®®åœ°å€é•¿åº¦,4
+        arp_data[6]  <= 8'h00;                   //OP,æ“ä½œç  8'h01ï¼šARPè¯·æ±‚ 8'h02:ARPåº”ç­”
         arp_data[7]  <= 8'h01;
-        arp_data[8]  <= BOARD_MAC[47:40];        //·¢ËÍ¶Ë(Ô´)MACµØÖ·
+        arp_data[8]  <= BOARD_MAC[47:40];        //å‘é€ç«¯(æº)MACåœ°å€
         arp_data[9]  <= BOARD_MAC[39:32];
         arp_data[10] <= BOARD_MAC[31:24];
         arp_data[11] <= BOARD_MAC[23:16];
         arp_data[12] <= BOARD_MAC[15:8];
         arp_data[13] <= BOARD_MAC[7:0];
-        arp_data[14] <= BOARD_IP[31:24];        //·¢ËÍ¶Ë(Ô´)IPµØÖ·
+        arp_data[14] <= BOARD_IP[31:24];        //å‘é€ç«¯(æº)IPåœ°å€
         arp_data[15] <= BOARD_IP[23:16];
         arp_data[16] <= BOARD_IP[15:8];
         arp_data[17] <= BOARD_IP[7:0];
-        arp_data[18] <= DES_MAC_DEFAULT[47:40]; //½ÓÊÕ¶Ë(Ä¿µÄ)MACµØÖ·
+        arp_data[18] <= DES_MAC_DEFAULT[47:40]; //æ¥æ”¶ç«¯(ç›®çš„)MACåœ°å€
         arp_data[19] <= DES_MAC_DEFAULT[39:32];
         arp_data[20] <= DES_MAC_DEFAULT[31:24];
         arp_data[21] <= DES_MAC_DEFAULT[23:16];
         arp_data[22] <= DES_MAC_DEFAULT[15:8];
         arp_data[23] <= DES_MAC_DEFAULT[7:0];
-        arp_data[24] <= DES_IP_DEFAULT[31:24];  //½ÓÊÕ¶Ë(Ä¿µÄ)IPµØÖ·
+        arp_data[24] <= DES_IP_DEFAULT[31:24];  //æ¥æ”¶ç«¯(ç›®çš„)IPåœ°å€
         arp_data[25] <= DES_IP_DEFAULT[23:16];
         arp_data[26] <= DES_IP_DEFAULT[15:8];
         arp_data[27] <= DES_IP_DEFAULT[7:0];
@@ -212,15 +212,15 @@ always @(posedge clk or negedge rst_n) begin
                 tx_cnt     <= 6'd0;
                 tx_done_t  <= 1'b0;
                 if(pos_tx_en) begin
-                    if(arp_tx_type == 1'b0) begin   //ARPÇëÇó
+                    if(arp_tx_type == 1'b0) begin   //ARPè¯·æ±‚
                         arp_data[6] <= 8'h00;
                         arp_data[7] <= 8'h01;
                     end
-                    else begin                      //ARPÓ¦´ğ
+                    else begin                      //ARPåº”ç­”
                         arp_data[6] <= 8'h00;
                         arp_data[7] <= 8'h02;
                     end
-                    //Èç¹ûÄ¿±êMACµØÖ·ºÍIPµØÖ·ÒÑ¾­¸üĞÂ,Ôò·¢ËÍÕıÈ·µÄµØÖ·
+                    //å¦‚æœç›®æ ‡MACåœ°å€å’ŒIPåœ°å€å·²ç»æ›´æ–°,åˆ™å‘é€æ­£ç¡®çš„åœ°å€
                     if((des_mac != 48'd0) && (des_ip != 32'd0)) begin
                         eth_head[0]  <= des_mac[47:40];
                         eth_head[1]  <= des_mac[39:32];
@@ -243,7 +243,7 @@ always @(posedge clk or negedge rst_n) begin
                 end
                 else;
             end
-            st_preamble : begin                 //·¢ËÍÇ°µ¼Âë+Ö¡ÆğÊ¼½ç¶¨·û
+            st_preamble : begin                 //å‘é€å‰å¯¼ç +å¸§èµ·å§‹ç•Œå®šç¬¦
                 gmii_tx_en <= 1'b1;
                 gmii_txd   <= preamble[tx_cnt];
                 if(tx_cnt == 6'd7)
@@ -251,7 +251,7 @@ always @(posedge clk or negedge rst_n) begin
                 else
                     tx_cnt <= tx_cnt + 6'd1;
             end
-            st_eth_head : begin                 //·¢ËÍÒÔÌ«ÍøÊ×²¿
+            st_eth_head : begin                 //å‘é€ä»¥å¤ªç½‘é¦–éƒ¨
                 gmii_tx_en <= 1'b1;
                 gmii_txd   <= eth_head[tx_cnt];
                 crc_en     <= 1'b1;
@@ -260,7 +260,7 @@ always @(posedge clk or negedge rst_n) begin
                 else
                     tx_cnt <= tx_cnt + 6'd1;
             end
-            st_arp_data : begin                 //·¢ËÍARPÊı¾İ
+            st_arp_data : begin                 //å‘é€ARPæ•°æ®
                 gmii_tx_en <= 1'b1;
                 gmii_txd   <= (tx_cnt < 6'd28) ? arp_data[tx_cnt] : 8'd0;
                 crc_en     <= 1'b1;
@@ -269,7 +269,7 @@ always @(posedge clk or negedge rst_n) begin
                 else
                     tx_cnt <= tx_cnt + 6'd1;
             end
-            st_crc : begin                      //·¢ËÍCRCĞ£ÑéÖµ
+            st_crc : begin                      //å‘é€CRCæ ¡éªŒå€¼
                 gmii_tx_en <= 1'b1;
                 crc_en     <= 1'b0;
                 tx_cnt     <= tx_cnt + 6'd1;
@@ -294,7 +294,7 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-//·¢ËÍÍê³ÉĞÅºÅ¼°crcÖµ¸´Î»ĞÅºÅ
+//å‘é€å®Œæˆä¿¡å·åŠcrcå€¼å¤ä½ä¿¡å·
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         tx_done <= 1'b0;

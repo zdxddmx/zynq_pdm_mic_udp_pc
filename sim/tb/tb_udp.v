@@ -1,10 +1,10 @@
 //****************************************Copyright (c)***********************************//
-//Ô­×Ó¸çÔÚÏß½ÌÑ§Æ½Ì¨£ºwww.yuanzige.com
-//¼¼ÊõÖ§³Ö£ºwww.openedv.com
-//ÌÔ±¦µêÆÌ£ºhttp://openedv.taobao.com 
-//¹Ø×¢Î¢ĞÅ¹«ÖÚÆ½Ì¨Î¢ĞÅºÅ£º"ÕıµãÔ­×Ó"£¬Ãâ·Ñ»ñÈ¡ZYNQ & FPGA & STM32 & LINUX×ÊÁÏ¡£
-//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ÕıµãÔ­×Ó 2018-2028
+//åŸå­å“¥åœ¨çº¿æ•™å­¦å¹³å°ï¼šwww.yuanzige.com
+//æŠ€æœ¯æ”¯æŒï¼šwww.openedv.com
+//æ·˜å®åº—é“ºï¼šhttp://openedv.taobao.com 
+//å…³æ³¨å¾®ä¿¡å…¬ä¼—å¹³å°å¾®ä¿¡å·ï¼š"æ­£ç‚¹åŸå­"ï¼Œå…è´¹è·å–ZYNQ & FPGA & STM32 & LINUXèµ„æ–™ã€‚
+//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
+//Copyright(C) æ­£ç‚¹åŸå­ 2018-2028
 //All rights reserved                                  
 //----------------------------------------------------------------------------------------
 // File name:           tb_udp
@@ -12,7 +12,7 @@
 // Last Version:        V1.0
 // Descriptions:        
 //----------------------------------------------------------------------------------------
-// Created by:          ÕıµãÔ­×Ó
+// Created by:          æ­£ç‚¹åŸå­
 // Created date:        2021/2/19 17:54:24
 // Version:             V1.0
 // Descriptions:        The original version
@@ -20,26 +20,26 @@
 //----------------------------------------------------------------------------------------
 //****************************************************************************************//
 
-`timescale  1ns/1ns                     //¶¨Òå·ÂÕæÊ±¼äµ¥Î»1nsºÍ·ÂÕæÊ±¼ä¾«¶ÈÎª1ns
+`timescale  1ns/1ns                     //å®šä¹‰ä»¿çœŸæ—¶é—´å•ä½1nså’Œä»¿çœŸæ—¶é—´ç²¾åº¦ä¸º1ns
 
 module  tb_udp;
 
 //parameter  define
-parameter  T = 8;                       //Ê±ÖÓÖÜÆÚÎª8ns
-parameter  OP_CYCLE = 100;              //²Ù×÷ÖÜÆÚ(·¢ËÍÖÜÆÚ¼ä¸ô)
+parameter  T = 8;                       //æ—¶é’Ÿå‘¨æœŸä¸º8ns
+parameter  OP_CYCLE = 100;              //æ“ä½œå‘¨æœŸ(å‘é€å‘¨æœŸé—´éš”)
 
-//¿ª·¢°åMACµØÖ· 00-11-22-33-44-55
+//å¼€å‘æ¿MACåœ°å€ 00-11-22-33-44-55
 parameter  BOARD_MAC = 48'h00_11_22_33_44_55;     
-//¿ª·¢°åIPµØÖ· 192.168.1.10     
+//å¼€å‘æ¿IPåœ°å€ 192.168.1.10     
 parameter  BOARD_IP  = {8'd192,8'd168,8'd1,8'd10};
-//Ä¿µÄMACµØÖ· ff_ff_ff_ff_ff_ff
+//ç›®çš„MACåœ°å€ ff_ff_ff_ff_ff_ff
 parameter  DES_MAC   = 48'hff_ff_ff_ff_ff_ff;
-//Ä¿µÄIPµØÖ· 192.168.1.102
+//ç›®çš„IPåœ°å€ 192.168.1.102
 parameter  DES_IP    = {8'd192,8'd168,8'd1,8'd10};
 
 //reg define
-reg           gmii_clk;    //Ê±ÖÓĞÅºÅ
-reg           sys_rst_n;   //¸´Î»ĞÅºÅ
+reg           gmii_clk;    //æ—¶é’Ÿä¿¡å·
+reg           sys_rst_n;   //å¤ä½ä¿¡å·
 
 reg           tx_start_en;
 reg   [7:0]   tx_data    ;
@@ -50,12 +50,12 @@ reg   [31:0]  des_ip     ;
 reg   [3:0]   flow_cnt   ;
 reg   [13:0]  delay_cnt  ;
 
-wire          gmii_rx_clk; //GMII½ÓÊÕÊ±ÖÓ
-wire          gmii_rx_dv ; //GMII½ÓÊÕÊı¾İÓĞĞ§ĞÅºÅ
-wire  [7:0]   gmii_rxd   ; //GMII½ÓÊÕÊı¾İ
-wire          gmii_tx_clk; //GMII·¢ËÍÊ±ÖÓ
-wire          gmii_tx_en ; //GMII·¢ËÍÊı¾İÊ¹ÄÜĞÅºÅ
-wire  [7:0]   gmii_txd   ; //GMII·¢ËÍÊı¾İ
+wire          gmii_rx_clk; //GMIIæ¥æ”¶æ—¶é’Ÿ
+wire          gmii_rx_dv ; //GMIIæ¥æ”¶æ•°æ®æœ‰æ•ˆä¿¡å·
+wire  [7:0]   gmii_rxd   ; //GMIIæ¥æ”¶æ•°æ®
+wire          gmii_tx_clk; //GMIIå‘é€æ—¶é’Ÿ
+wire          gmii_tx_en ; //GMIIå‘é€æ•°æ®ä½¿èƒ½ä¿¡å·
+wire  [7:0]   gmii_txd   ; //GMIIå‘é€æ•°æ®
               
 wire          tx_done    ; 
 wire          tx_req     ;
@@ -69,14 +69,14 @@ assign gmii_tx_clk = gmii_clk   ;
 assign gmii_rx_dv  = gmii_tx_en ;
 assign gmii_rxd    = gmii_txd   ;
 
-//¸øÊäÈëĞÅºÅ³õÊ¼Öµ
+//ç»™è¾“å…¥ä¿¡å·åˆå§‹å€¼
 initial begin
     gmii_clk           = 1'b0;
-    sys_rst_n          = 1'b0;     //¸´Î»
-    #(T+1)  sys_rst_n  = 1'b1;     //ÔÚµÚ(T+1)nsµÄÊ±ºò¸´Î»ĞÅºÅĞÅºÅÀ­¸ß
+    sys_rst_n          = 1'b0;     //å¤ä½
+    #(T+1)  sys_rst_n  = 1'b1;     //åœ¨ç¬¬(T+1)nsçš„æ—¶å€™å¤ä½ä¿¡å·ä¿¡å·æ‹‰é«˜
 end
 
-//125MhzµÄÊ±ÖÓ£¬ÖÜÆÚÔòÎª1/125Mhz=8ns,ËùÒÔÃ¿4ns£¬µçÆ½È¡·´Ò»´Î
+//125Mhzçš„æ—¶é’Ÿï¼Œå‘¨æœŸåˆ™ä¸º1/125Mhz=8ns,æ‰€ä»¥æ¯4nsï¼Œç”µå¹³å–åä¸€æ¬¡
 always #(T/2) gmii_clk = ~gmii_clk;
 
 always @(posedge gmii_clk or negedge sys_rst_n) begin
@@ -93,8 +93,8 @@ always @(posedge gmii_clk or negedge sys_rst_n) begin
         case(flow_cnt)
             'd0 : flow_cnt <= flow_cnt + 1'b1;
             'd1 : begin
-                tx_start_en <= 1'b1;  //À­¸ß¿ªÊ¼·¢ËÍÊ¹ÄÜĞÅºÅ
-                tx_byte_num <= 16'd10;//ÉèÖÃ·¢ËÍµÄ×Ö½ÚÊı
+                tx_start_en <= 1'b1;  //æ‹‰é«˜å¼€å§‹å‘é€ä½¿èƒ½ä¿¡å·
+                tx_byte_num <= 16'd10;//è®¾ç½®å‘é€çš„å­—èŠ‚æ•°
                 flow_cnt <= flow_cnt + 1'b1;
             end
             'd2 : begin 
@@ -115,8 +115,8 @@ always @(posedge gmii_clk or negedge sys_rst_n) begin
                     flow_cnt <= flow_cnt + 1'b1;
             end
             'd5 : begin
-                tx_start_en <= 1'b1;  //À­¸ß¿ªÊ¼·¢ËÍÊ¹ÄÜĞÅºÅ
-                tx_byte_num <= 16'd30;//ÉèÖÃ·¢ËÍµÄ×Ö½ÚÊı
+                tx_start_en <= 1'b1;  //æ‹‰é«˜å¼€å§‹å‘é€ä½¿èƒ½ä¿¡å·
+                tx_byte_num <= 16'd30;//è®¾ç½®å‘é€çš„å­—èŠ‚æ•°
                 flow_cnt <= flow_cnt + 1'b1;               
             end
             'd6 : begin 
@@ -136,10 +136,10 @@ always @(posedge gmii_clk or negedge sys_rst_n) begin
     end
 end
 
-//Àı»¯UDPÄ£¿é
+//ä¾‹åŒ–UDPæ¨¡å—
 udp                                             
    #(
-    .BOARD_MAC     (BOARD_MAC),      //²ÎÊıÀı»¯
+    .BOARD_MAC     (BOARD_MAC),      //å‚æ•°ä¾‹åŒ–
     .BOARD_IP      (BOARD_IP ),
     .DES_MAC       (DES_MAC  ),
     .DES_IP        (DES_IP   )

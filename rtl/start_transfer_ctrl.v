@@ -1,55 +1,55 @@
 //****************************************Copyright (c)***********************************//
-//Ô­×Ó¸çÔÚÏß½ÌÑ§Æ½Ì¨£ºwww.yuanzige.com
-//¼¼ÊõÖ§³Ö£ºhttp://www.openedv.com/forum.php
-//ÌÔ±¦µêÆÌ£ºhttps://zhengdianyuanzi.tmall.com
-//¹Ø×¢Î¢ĞÅ¹«ÖÚÆ½Ì¨Î¢ĞÅºÅ£º"ÕıµãÔ­×Ó"£¬Ãâ·Ñ»ñÈ¡ZYNQ & FPGA & STM32 & LINUX×ÊÁÏ¡£
-//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ÕıµãÔ­×Ó 2023-2033
+//åŸå­å“¥åœ¨çº¿æ•™å­¦å¹³å°ï¼šwww.yuanzige.com
+//æŠ€æœ¯æ”¯æŒï¼šhttp://www.openedv.com/forum.php
+//æ·˜å®åº—é“ºï¼šhttps://zhengdianyuanzi.tmall.com
+//å…³æ³¨å¾®ä¿¡å…¬ä¼—å¹³å°å¾®ä¿¡å·ï¼š"æ­£ç‚¹åŸå­"ï¼Œå…è´¹è·å–ZYNQ & FPGA & STM32 & LINUXèµ„æ–™ã€‚
+//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
+//Copyright(C) æ­£ç‚¹åŸå­ 2023-2033
 //All rights reserved                                   
 //----------------------------------------------------------------------------------------
 // File name:           start_transfer_ctrl
 // Last modified Date:  2023/2/18 9:20:14
 // Last Version:        V1.0
-// Descriptions:        ¿ªÊ¼´«Êä¿ØÖÆÄ£¿é
+// Descriptions:        å¼€å§‹ä¼ è¾“æ§åˆ¶æ¨¡å—
 //
 //----------------------------------------------------------------------------------------
 //****************************************************************************************//
 
 module start_transfer_ctrl(
-    input                 clk                ,   //Ê±ÖÓĞÅºÅ
-    input                 rst_n              ,   //¸´Î»ĞÅºÅ£¬µÍµçÆ½ÓĞĞ§
-    input                 udp_rec_pkt_done   ,   //UDPµ¥°üÊı¾İ½ÓÊÕÍê³ÉĞÅºÅ 
-    input                 udp_rec_en         ,   //UDP½ÓÊÕµÄÊı¾İÊ¹ÄÜĞÅºÅ
-    input        [7 :0]   udp_rec_data       ,   //UDP½ÓÊÕµÄÊı¾İ 
-    input        [15:0]   udp_rec_byte_num   ,   //UDP½ÓÊÕµ½µÄ×Ö½ÚÊı   
+    input                 clk                ,   //æ—¶é’Ÿä¿¡å·
+    input                 rst_n              ,   //å¤ä½ä¿¡å·ï¼Œä½ç”µå¹³æœ‰æ•ˆ
+    input                 udp_rec_pkt_done   ,   //UDPå•åŒ…æ•°æ®æ¥æ”¶å®Œæˆä¿¡å· 
+    input                 udp_rec_en         ,   //UDPæ¥æ”¶çš„æ•°æ®ä½¿èƒ½ä¿¡å·
+    input        [7 :0]   udp_rec_data       ,   //UDPæ¥æ”¶çš„æ•°æ® 
+    input        [15:0]   udp_rec_byte_num   ,   //UDPæ¥æ”¶åˆ°çš„å­—èŠ‚æ•°   
     output  reg  [1:0]    ctrl               ,                                
-    output  reg           transfer_flag          //Í¼Ïñ¿ªÊ¼´«Êä±êÖ¾,1:¿ªÊ¼´«Êä 0:Í£Ö¹´«Êä    
+    output  reg           transfer_flag          //å›¾åƒå¼€å§‹ä¼ è¾“æ ‡å¿—,1:å¼€å§‹ä¼ è¾“ 0:åœæ­¢ä¼ è¾“    
     );    
     
 //parameter define
-parameter  START_1 = 8'd1;  //Í¨µÀÒ»¿ªÊ¼ÃüÁî
-parameter  STOP    = 8'd0;  //Í£Ö¹ÃüÁî
-parameter  START_2 = 8'd2;  //Í¨µÀ¶ş¿ªÊ¼ÃüÁî
+parameter  START_1 = 8'd1;  //é€šé“ä¸€å¼€å§‹å‘½ä»¤
+parameter  STOP    = 8'd0;  //åœæ­¢å‘½ä»¤
+parameter  START_2 = 8'd2;  //é€šé“äºŒå¼€å§‹å‘½ä»¤
 //*****************************************************
 //**                    main code
 //*****************************************************
 
-//½âÎö½ÓÊÕµ½µÄÊı¾İ
+//è§£ææ¥æ”¶åˆ°çš„æ•°æ®
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         transfer_flag <= 1'b0;
         ctrl          <= 2'b0;
         end
     else if(udp_rec_pkt_done && udp_rec_byte_num == 1'b1) begin
-        if(udp_rec_data == START_1)begin       //¿ªÊ¼´«Êä
+        if(udp_rec_data == START_1)begin       //å¼€å§‹ä¼ è¾“
             transfer_flag <= 1'b1;
             ctrl          <= 2'b01;
         end
-        else if(udp_rec_data == START_2)begin  //¿ªÊ¼´«Êä
+        else if(udp_rec_data == START_2)begin  //å¼€å§‹ä¼ è¾“
             transfer_flag <= 1'b1;
             ctrl          <= 2'b10;
         end
-        else if(udp_rec_data == STOP)begin     //Í£Ö¹´«Êä
+        else if(udp_rec_data == STOP)begin     //åœæ­¢ä¼ è¾“
             transfer_flag <= 1'b0;
             ctrl          <= 2'b00;
         end

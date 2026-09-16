@@ -1,64 +1,64 @@
 //****************************************Copyright (c)***********************************//
-//Ô­×Ó¸çÔÚÏß½ÌÑ§Æ½Ì¨£ºwww.yuanzige.com
-//¼¼ÊõÖ§³Ö£ºhttp://www.openedv.com/forum.php
-//ÌÔ±¦µêÆÌ£ºhttps://zhengdianyuanzi.tmall.com
-//¹Ø×¢Î¢ĞÅ¹«ÖÚÆ½Ì¨Î¢ĞÅºÅ£º"ÕıµãÔ­×Ó"£¬Ãâ·Ñ»ñÈ¡ZYNQ & FPGA & STM32 & LINUX×ÊÁÏ¡£
-//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ÕıµãÔ­×Ó 2023-2033
+//åŸå­å“¥åœ¨çº¿æ•™å­¦å¹³å°ï¼šwww.yuanzige.com
+//æŠ€æœ¯æ”¯æŒï¼šhttp://www.openedv.com/forum.php
+//æ·˜å®åº—é“ºï¼šhttps://zhengdianyuanzi.tmall.com
+//å…³æ³¨å¾®ä¿¡å…¬ä¼—å¹³å°å¾®ä¿¡å·ï¼š"æ­£ç‚¹åŸå­"ï¼Œå…è´¹è·å–ZYNQ & FPGA & STM32 & LINUXèµ„æ–™ã€‚
+//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
+//Copyright(C) æ­£ç‚¹åŸå­ 2023-2033
 //All rights reserved
 //----------------------------------------------------------------------------------------
 // File name:           udp_rx
-// Created by:          ÕıµãÔ­×Ó
-// Created date:        2025Äê10ÔÂ22ÈÕ13:38:00
+// Created by:          æ­£ç‚¹åŸå­
+// Created date:        2025å¹´10æœˆ22æ—¥13:38:00
 // Version:             V1.0
-// Descriptions:        ÒÔÌ«ÍøudpÊı¾İ½ÓÊÕÄ£¿é
+// Descriptions:        ä»¥å¤ªç½‘udpæ•°æ®æ¥æ”¶æ¨¡å—
 //
 //----------------------------------------------------------------------------------------
 //****************************************************************************************//
 
 module udp_rx(
-    input                clk         , //Ê±ÖÓĞÅºÅ
-    input                rst_n       , //¸´Î»ĞÅºÅ£¬µÍµçÆ½ÓĞĞ§
-    input                gmii_rx_dv  , //GMIIÊäÈëÊı¾İÓĞĞ§ĞÅºÅ
-    input        [7:0]   gmii_rxd    , //GMIIÊäÈëÊı¾İ
+    input                clk         , //æ—¶é’Ÿä¿¡å·
+    input                rst_n       , //å¤ä½ä¿¡å·ï¼Œä½ç”µå¹³æœ‰æ•ˆ
+    input                gmii_rx_dv  , //GMIIè¾“å…¥æ•°æ®æœ‰æ•ˆä¿¡å·
+    input        [7:0]   gmii_rxd    , //GMIIè¾“å…¥æ•°æ®
     
-    output  reg          rec_pkt_done, //ÒÔÌ«Íøµ¥°üÊı¾İ½ÓÊÕÍê³ÉĞÅºÅ
-    output  reg          rec_en      , //ÒÔÌ«Íø½ÓÊÕµÄÊı¾İÊ¹ÄÜĞÅºÅ
-    output  reg  [7 :0]  rec_data    , //ÒÔÌ«Íø½ÓÊÕµÄÊı¾İ
-    output  reg  [15:0]  rec_byte_num  //ÒÔÌ«Íø½ÓÊÕµÄÓĞĞ§×ÖÊı µ¥Î»:byte
+    output  reg          rec_pkt_done, //ä»¥å¤ªç½‘å•åŒ…æ•°æ®æ¥æ”¶å®Œæˆä¿¡å·
+    output  reg          rec_en      , //ä»¥å¤ªç½‘æ¥æ”¶çš„æ•°æ®ä½¿èƒ½ä¿¡å·
+    output  reg  [7 :0]  rec_data    , //ä»¥å¤ªç½‘æ¥æ”¶çš„æ•°æ®
+    output  reg  [15:0]  rec_byte_num  //ä»¥å¤ªç½‘æ¥æ”¶çš„æœ‰æ•ˆå­—æ•° å•ä½:byte
     );
 
 //parameter define
-//¿ª·¢°åMACµØÖ· 00-11-22-33-44-55
+//å¼€å‘æ¿MACåœ°å€ 00-11-22-33-44-55
 parameter BOARD_MAC = 48'h00_11_22_33_44_55;
-//¿ª·¢°åIPµØÖ· 192.168.1.10 
+//å¼€å‘æ¿IPåœ°å€ 192.168.1.10 
 parameter BOARD_IP  = {8'd192,8'd168,8'd1,8'd10};
 
 //localparam define
-//×´Ì¬»ú×´Ì¬¶¨Òå
-localparam st_idle      = 7'b000_0001; //³õÊ¼×´Ì¬£¬µÈ´ı½ÓÊÕÇ°µ¼Âë
-localparam st_preamble  = 7'b000_0010; //½ÓÊÕÇ°µ¼Âë×´Ì¬ 
-localparam st_eth_head  = 7'b000_0100; //½ÓÊÕÒÔÌ«ÍøÖ¡Í·
-localparam st_ip_head   = 7'b000_1000; //½ÓÊÕIPÊ×²¿
-localparam st_udp_head  = 7'b001_0000; //½ÓÊÕUDPÊ×²¿
-localparam st_rx_data   = 7'b010_0000; //½ÓÊÕÓĞĞ§Êı¾İ
-localparam st_rx_end    = 7'b100_0000; //½ÓÊÕ½áÊø
-//ÒÔÌ«ÍøÀàĞÍ¶¨Òå
-localparam ETH_TYPE_IP  = 16'h0800   ; //ÒÔÌ«ÍøĞ­ÒéÀàĞÍ IPĞ­Òé
-localparam UDP_TYPE     = 8'd17      ; //UDPĞ­ÒéÀàĞÍ
+//çŠ¶æ€æœºçŠ¶æ€å®šä¹‰
+localparam st_idle      = 7'b000_0001; //åˆå§‹çŠ¶æ€ï¼Œç­‰å¾…æ¥æ”¶å‰å¯¼ç 
+localparam st_preamble  = 7'b000_0010; //æ¥æ”¶å‰å¯¼ç çŠ¶æ€ 
+localparam st_eth_head  = 7'b000_0100; //æ¥æ”¶ä»¥å¤ªç½‘å¸§å¤´
+localparam st_ip_head   = 7'b000_1000; //æ¥æ”¶IPé¦–éƒ¨
+localparam st_udp_head  = 7'b001_0000; //æ¥æ”¶UDPé¦–éƒ¨
+localparam st_rx_data   = 7'b010_0000; //æ¥æ”¶æœ‰æ•ˆæ•°æ®
+localparam st_rx_end    = 7'b100_0000; //æ¥æ”¶ç»“æŸ
+//ä»¥å¤ªç½‘ç±»å‹å®šä¹‰
+localparam ETH_TYPE_IP  = 16'h0800   ; //ä»¥å¤ªç½‘åè®®ç±»å‹ IPåè®®
+localparam UDP_TYPE     = 8'd17      ; //UDPåè®®ç±»å‹
 
 //reg define
 reg  [6:0]   cur_state       ;
 reg  [6:0]   next_state      ;
 
-reg  [4:0]   rx_cnt          ; //½âÎöÊı¾İ¼ÆÊıÆ÷
-reg  [15:0]  udp_rx_cnt      ; //½ÓÊÕUDPÊı¾İ¼ÆÊı
-reg  [47:0]  des_mac_temp    ; //Ä¿µÄMACµØÖ·
-reg  [31:0]  des_ip_temp     ; //Ä¿µÄIPµØÖ·
-reg  [15:0]  eth_type        ; //ÒÔÌ«ÍøÀàĞÍ
-reg  [5:0]   ip_head_byte_num; //IPÊ×²¿³¤¶È
-reg  [15:0]  udp_byte_num    ; //UDP³¤¶È
-reg  [15:0]  data_byte_num   ; //Êı¾İ³¤¶È
+reg  [4:0]   rx_cnt          ; //è§£ææ•°æ®è®¡æ•°å™¨
+reg  [15:0]  udp_rx_cnt      ; //æ¥æ”¶UDPæ•°æ®è®¡æ•°
+reg  [47:0]  des_mac_temp    ; //ç›®çš„MACåœ°å€
+reg  [31:0]  des_ip_temp     ; //ç›®çš„IPåœ°å€
+reg  [15:0]  eth_type        ; //ä»¥å¤ªç½‘ç±»å‹
+reg  [5:0]   ip_head_byte_num; //IPé¦–éƒ¨é•¿åº¦
+reg  [15:0]  udp_byte_num    ; //UDPé•¿åº¦
+reg  [15:0]  data_byte_num   ; //æ•°æ®é•¿åº¦
 
 //wire define
 wire         des_mac_match   ;
@@ -68,12 +68,12 @@ wire         eth_type_match  ;
 //**                    main code
 //*****************************************************
 
-//ÅĞ¶Ï½ÓÊÕµ½µÄÄ¿µÄMACµØÖ·ÊÇ²»ÊÇ¿ª·¢°åµÄ»òÕß¹«¹²MACµØÖ·
+//åˆ¤æ–­æ¥æ”¶åˆ°çš„ç›®çš„MACåœ°å€æ˜¯ä¸æ˜¯å¼€å‘æ¿çš„æˆ–è€…å…¬å…±MACåœ°å€
 assign des_mac_match = ((des_mac_temp == BOARD_MAC) || (des_mac_temp == 48'hff_ff_ff_ff_ff_ff));
-//ÅĞ¶ÏÒÔÌ«ÍøµÄĞ­ÒéÀàĞÍÊÇ²»ÊÇUDP
+//åˆ¤æ–­ä»¥å¤ªç½‘çš„åè®®ç±»å‹æ˜¯ä¸æ˜¯UDP
 assign eth_type_match = (eth_type[15:8] == ETH_TYPE_IP[15:8]) && (gmii_rxd == ETH_TYPE_IP[7:0]);
 
-//(Èı¶ÎÊ½×´Ì¬»ú)Í¬²½Ê±ĞòÃèÊö×´Ì¬×ªÒÆ
+//(ä¸‰æ®µå¼çŠ¶æ€æœº)åŒæ­¥æ—¶åºæè¿°çŠ¶æ€è½¬ç§»
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)
         cur_state <= st_idle;
@@ -81,17 +81,17 @@ always @(posedge clk or negedge rst_n) begin
         cur_state <= next_state;
 end
 
-//×éºÏÂß¼­ÅĞ¶Ï×´Ì¬×ªÒÆÌõ¼ş
+//ç»„åˆé€»è¾‘åˆ¤æ–­çŠ¶æ€è½¬ç§»æ¡ä»¶
 always @(*) begin
     next_state = st_idle;
     case(cur_state)
-        st_idle : begin                 //µÈ´ı½ÓÊÕÇ°µ¼Âë
+        st_idle : begin                 //ç­‰å¾…æ¥æ”¶å‰å¯¼ç 
             if((gmii_rx_dv == 1'b1) && (gmii_rxd == 8'h55))
                 next_state = st_preamble;
             else
                 next_state = st_idle;
         end
-        st_preamble : begin             //½ÓÊÕÇ°µ¼Âë
+        st_preamble : begin             //æ¥æ”¶å‰å¯¼ç 
             if(gmii_rx_dv)begin
                 if((rx_cnt <= 5'd6) && (gmii_rxd == 8'h55))
                     next_state = st_preamble;
@@ -101,10 +101,10 @@ always @(*) begin
                     next_state = st_rx_end;
             end
         end
-        st_eth_head : begin             //½ÓÊÕÒÔÌ«ÍøÖ¡Í·
+        st_eth_head : begin             //æ¥æ”¶ä»¥å¤ªç½‘å¸§å¤´
             if(gmii_rx_dv) begin
                 if(rx_cnt == 5'd13) begin
-                    //ÅĞ¶ÏMACµØÖ·ÊÇ·ñÎª¿ª·¢°åMACµØÖ·»òÕß¹«¹²MACµØÖ·
+                    //åˆ¤æ–­MACåœ°å€æ˜¯å¦ä¸ºå¼€å‘æ¿MACåœ°å€æˆ–è€…å…¬å…±MACåœ°å€
                     if((des_mac_match == 1'b1) && (eth_type_match == 1'b1))
                         next_state = st_ip_head;
                     else
@@ -116,7 +116,7 @@ always @(*) begin
             else
                 next_state = st_rx_end;
         end
-        st_ip_head : begin              //½ÓÊÕIPÊ×²¿
+        st_ip_head : begin              //æ¥æ”¶IPé¦–éƒ¨
             if(gmii_rx_dv) begin
                 if((rx_cnt == 5'd9) && (gmii_rxd != UDP_TYPE))
                     next_state = st_rx_end;
@@ -132,7 +132,7 @@ always @(*) begin
             else
                 next_state = st_rx_end;
         end
-        st_udp_head : begin             //½ÓÊÕUDPÊ×²¿
+        st_udp_head : begin             //æ¥æ”¶UDPé¦–éƒ¨
             if(gmii_rx_dv)begin
                 if(rx_cnt == 5'd7)
                     next_state = st_rx_data;
@@ -142,7 +142,7 @@ always @(*) begin
             else
                 next_state = st_rx_end;
         end
-        st_rx_data : begin              //½ÓÊÕÓĞĞ§Êı¾İ
+        st_rx_data : begin              //æ¥æ”¶æœ‰æ•ˆæ•°æ®
             if(gmii_rx_dv)begin
                 if(udp_rx_cnt == data_byte_num - 16'd1)
                     next_state = st_rx_end;
@@ -152,7 +152,7 @@ always @(*) begin
             else
                 next_state = st_rx_end;
         end
-        st_rx_end : begin               //½ÓÊÕ½áÊø
+        st_rx_end : begin               //æ¥æ”¶ç»“æŸ
             if(gmii_rx_dv == 1'b0)
                 next_state = st_idle;
             else
@@ -162,7 +162,7 @@ always @(*) begin
     endcase
 end
 
-//Ê±ĞòµçÂ·ÃèÊö×´Ì¬Êä³ö,½âÎöÒÔÌ«ÍøÊı¾İ
+//æ—¶åºç”µè·¯æè¿°çŠ¶æ€è¾“å‡º,è§£æä»¥å¤ªç½‘æ•°æ®
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         rx_cnt           <= 5'd0 ;
@@ -189,7 +189,7 @@ always @(posedge clk or negedge rst_n) begin
                 else ;
             end
             st_preamble : begin
-                if(gmii_rx_dv) begin                         //½âÎöÇ°µ¼Âë
+                if(gmii_rx_dv) begin                         //è§£æå‰å¯¼ç 
                     if(rx_cnt == 5'd7)
                         rx_cnt <= 5'd0;
                     else
@@ -201,9 +201,9 @@ always @(posedge clk or negedge rst_n) begin
                 if(gmii_rx_dv) begin
                     rx_cnt <= rx_cnt + 5'b1;
                     if((rx_cnt >= 5'd0) && (rx_cnt <= 5'd5))
-                        des_mac_temp <= {des_mac_temp[39:0],gmii_rxd};  //Ä¿µÄMACµØÖ·
+                        des_mac_temp <= {des_mac_temp[39:0],gmii_rxd};  //ç›®çš„MACåœ°å€
                     else if(rx_cnt == 5'd12)
-                        eth_type[15:8] <= gmii_rxd;                     //ÒÔÌ«ÍøĞ­ÒéÀàĞÍ
+                        eth_type[15:8] <= gmii_rxd;                     //ä»¥å¤ªç½‘åè®®ç±»å‹
                     else if(rx_cnt == 5'd13) begin
                         rx_cnt        <= 5'd0;
                         eth_type[7:0] <= gmii_rxd;
@@ -220,7 +220,7 @@ always @(posedge clk or negedge rst_n) begin
                     else if(rx_cnt == 5'd0)
                         ip_head_byte_num <= {gmii_rxd[3:0],2'd0};
                     else if((rx_cnt >= 5'd16) && (rx_cnt <= 5'd19))
-                        des_ip_temp <= {des_ip_temp[23:0],gmii_rxd};   //Ä¿µÄIPµØÖ·
+                        des_ip_temp <= {des_ip_temp[23:0],gmii_rxd};   //ç›®çš„IPåœ°å€
                     else ;
                 end
                 else ;
@@ -229,11 +229,11 @@ always @(posedge clk or negedge rst_n) begin
                 if(gmii_rx_dv) begin
                     rx_cnt <= rx_cnt + 5'd1;
                     if(rx_cnt == 5'd4)
-                        udp_byte_num[15:8] <= gmii_rxd;      //½âÎöUDP×Ö½Ú³¤¶È 
+                        udp_byte_num[15:8] <= gmii_rxd;      //è§£æUDPå­—èŠ‚é•¿åº¦ 
                     else if(rx_cnt == 5'd5)
                         udp_byte_num[7:0] <= gmii_rxd;
                     else if(rx_cnt == 5'd7) begin
-                        //ÓĞĞ§Êı¾İ×Ö½Ú³¤¶È£¬£¨UDPÊ×²¿8¸ö×Ö½Ú£¬ËùÒÔ¼õÈ¥8£©
+                        //æœ‰æ•ˆæ•°æ®å­—èŠ‚é•¿åº¦ï¼Œï¼ˆUDPé¦–éƒ¨8ä¸ªå­—èŠ‚ï¼Œæ‰€ä»¥å‡å»8ï¼‰
                         data_byte_num <= udp_byte_num - 16'd8;
                         rx_cnt        <= 5'd0;
                     end
@@ -242,7 +242,7 @@ always @(posedge clk or negedge rst_n) begin
                 else ;
             end
             st_rx_data : begin
-                //½ÓÊÕÊı¾İ
+                //æ¥æ”¶æ•°æ®
                 if(gmii_rx_dv) begin
                     udp_rx_cnt <= udp_rx_cnt + 16'd1;
                     rec_data   <= gmii_rxd;
@@ -256,7 +256,7 @@ always @(posedge clk or negedge rst_n) begin
                 end
                 else ;
             end
-            st_rx_end : begin                               //µ¥°üÊı¾İ½ÓÊÕÍê³É
+            st_rx_end : begin                               //å•åŒ…æ•°æ®æ¥æ”¶å®Œæˆ
                 rec_en <= 1'b0;
                 rx_cnt <= 16'd0;
             end

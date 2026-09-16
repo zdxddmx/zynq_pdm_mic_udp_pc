@@ -1,41 +1,41 @@
 //****************************************Copyright (c)***********************************//
-//Ô­×Ó¸çÔÚÏß½ÌÑ§Æ½Ì¨£ºwww.yuanzige.com
-//¼¼ÊõÖ§³Ö£ºhttp://www.openedv.com/forum.php
-//ÌÔ±¦µêÆÌ£ºhttps://zhengdianyuanzi.tmall.com
-//¹Ø×¢Î¢ĞÅ¹«ÖÚÆ½Ì¨Î¢ĞÅºÅ£º"ÕıµãÔ­×Ó"£¬Ãâ·Ñ»ñÈ¡ZYNQ & FPGA & STM32 & LINUX×ÊÁÏ¡£
-//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ÕıµãÔ­×Ó 2023-2033
+//åŸå­å“¥åœ¨çº¿æ•™å­¦å¹³å°ï¼šwww.yuanzige.com
+//æŠ€æœ¯æ”¯æŒï¼šhttp://www.openedv.com/forum.php
+//æ·˜å®åº—é“ºï¼šhttps://zhengdianyuanzi.tmall.com
+//å…³æ³¨å¾®ä¿¡å…¬ä¼—å¹³å°å¾®ä¿¡å·ï¼š"æ­£ç‚¹åŸå­"ï¼Œå…è´¹è·å–ZYNQ & FPGA & STM32 & LINUXèµ„æ–™ã€‚
+//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
+//Copyright(C) æ­£ç‚¹åŸå­ 2023-2033
 //All rights reserved
 //----------------------------------------------------------------------------------------
 // File name:           gmii_to_rgmii
-// Created by:          ÕıµãÔ­×Ó
-// Created date:        2025Äê10ÔÂ13ÈÕ09:40:02
+// Created by:          æ­£ç‚¹åŸå­
+// Created date:        2025å¹´10æœˆ13æ—¥09:40:02
 // Version:             V1.0
-// Descriptions:        GMII½Ó¿Ú×ªRGMII½Ó¿ÚÄ£¿é
+// Descriptions:        GMIIæ¥å£è½¬RGMIIæ¥å£æ¨¡å—
 //
 //----------------------------------------------------------------------------------------
 //****************************************************************************************//
 
 module gmii_to_rgmii(
-    input              idelay_clk  , //IDELAYÊ±ÖÓ
-    //ÒÔÌ«ÍøGMII½Ó¿Ú
-    output             gmii_rx_clk , //GMII½ÓÊÕÊ±ÖÓ
-    output             gmii_rx_dv  , //GMII½ÓÊÕÊı¾İÓĞĞ§ĞÅºÅ
-    output      [7:0]  gmii_rxd    , //GMII½ÓÊÕÊı¾İ
-    output             gmii_tx_clk , //GMII·¢ËÍÊ±ÖÓ
-    input              gmii_tx_en  , //GMII·¢ËÍÊı¾İÊ¹ÄÜĞÅºÅ
-    input       [7:0]  gmii_txd    , //GMII·¢ËÍÊı¾İ            
-    //ÒÔÌ«ÍøRGMII½Ó¿Ú   
-    input              rgmii_rxc   , //RGMII½ÓÊÕÊ±ÖÓ
-    input              rgmii_rx_ctl, //RGMII½ÓÊÕÊı¾İ¿ØÖÆĞÅºÅ
-    input       [3:0]  rgmii_rxd   , //RGMII½ÓÊÕÊı¾İ
-    output             rgmii_txc   , //RGMII·¢ËÍÊ±ÖÓ    
-    output             rgmii_tx_ctl, //RGMII·¢ËÍÊı¾İ¿ØÖÆĞÅºÅ
-    output      [3:0]  rgmii_txd     //RGMII·¢ËÍÊı¾İ          
+    input              idelay_clk  , //IDELAYæ—¶é’Ÿ
+    //ä»¥å¤ªç½‘GMIIæ¥å£
+    output             gmii_rx_clk , //GMIIæ¥æ”¶æ—¶é’Ÿ
+    output             gmii_rx_dv  , //GMIIæ¥æ”¶æ•°æ®æœ‰æ•ˆä¿¡å·
+    output      [7:0]  gmii_rxd    , //GMIIæ¥æ”¶æ•°æ®
+    output             gmii_tx_clk , //GMIIå‘é€æ—¶é’Ÿ
+    input              gmii_tx_en  , //GMIIå‘é€æ•°æ®ä½¿èƒ½ä¿¡å·
+    input       [7:0]  gmii_txd    , //GMIIå‘é€æ•°æ®            
+    //ä»¥å¤ªç½‘RGMIIæ¥å£   
+    input              rgmii_rxc   , //RGMIIæ¥æ”¶æ—¶é’Ÿ
+    input              rgmii_rx_ctl, //RGMIIæ¥æ”¶æ•°æ®æ§åˆ¶ä¿¡å·
+    input       [3:0]  rgmii_rxd   , //RGMIIæ¥æ”¶æ•°æ®
+    output             rgmii_txc   , //RGMIIå‘é€æ—¶é’Ÿ    
+    output             rgmii_tx_ctl, //RGMIIå‘é€æ•°æ®æ§åˆ¶ä¿¡å·
+    output      [3:0]  rgmii_txd     //RGMIIå‘é€æ•°æ®          
     );
 
 //parameter define
-parameter IDELAY_VALUE = 0;  //ÊäÈëÊı¾İIOÑÓÊ±(Èç¹ûÎªn,±íÊ¾ÑÓÊ±n*78ps) 
+parameter IDELAY_VALUE = 0;  //è¾“å…¥æ•°æ®IOå»¶æ—¶(å¦‚æœä¸ºn,è¡¨ç¤ºå»¶æ—¶n*78ps) 
 
 //*****************************************************
 //**                    main code
@@ -43,7 +43,7 @@ parameter IDELAY_VALUE = 0;  //ÊäÈëÊı¾İIOÑÓÊ±(Èç¹ûÎªn,±íÊ¾ÑÓÊ±n*78ps)
 
 assign gmii_tx_clk = gmii_rx_clk;
 
-//RGMII½ÓÊÕ
+//RGMIIæ¥æ”¶
 rgmii_rx 
     #(
      .IDELAY_VALUE  (IDELAY_VALUE)
@@ -59,7 +59,7 @@ rgmii_rx
     .gmii_rxd      (gmii_rxd   )
     );
 
-//RGMII·¢ËÍ
+//RGMIIå‘é€
 rgmii_tx u_rgmii_tx(
     .gmii_tx_clk   (gmii_tx_clk ),
     .gmii_tx_en    (gmii_tx_en  ),

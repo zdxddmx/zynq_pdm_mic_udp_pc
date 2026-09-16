@@ -1,37 +1,37 @@
 //****************************************Copyright (c)***********************************//
-//Ô­×Ó¸çÔÚÏß½ÌÑ§Æ½Ì¨£ºwww.yuanzige.com
-//¼¼ÊõÖ§³Ö£ºhttp://www.openedv.com/forum.php
-//ÌÔ±¦µêÆÌ£ºhttps://zhengdianyuanzi.tmall.com
-//¹Ø×¢Î¢ĞÅ¹«ÖÚÆ½Ì¨Î¢ĞÅºÅ£º"ÕıµãÔ­×Ó"£¬Ãâ·Ñ»ñÈ¡ZYNQ & FPGA & STM32 & LINUX×ÊÁÏ¡£
-//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ÕıµãÔ­×Ó 2023-2033
+//åŸå­å“¥åœ¨çº¿æ•™å­¦å¹³å°ï¼šwww.yuanzige.com
+//æŠ€æœ¯æ”¯æŒï¼šhttp://www.openedv.com/forum.php
+//æ·˜å®åº—é“ºï¼šhttps://zhengdianyuanzi.tmall.com
+//å…³æ³¨å¾®ä¿¡å…¬ä¼—å¹³å°å¾®ä¿¡å·ï¼š"æ­£ç‚¹åŸå­"ï¼Œå…è´¹è·å–ZYNQ & FPGA & STM32 & LINUXèµ„æ–™ã€‚
+//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
+//Copyright(C) æ­£ç‚¹åŸå­ 2023-2033
 //All rights reserved
 //----------------------------------------------------------------------------------------
 // File name:           arp_rx
-// Created by:          ÕıµãÔ­×Ó
-// Created date:        2025Äê10ÔÂ13ÈÕ09:40:02
+// Created by:          æ­£ç‚¹åŸå­
+// Created date:        2025å¹´10æœˆ13æ—¥09:40:02
 // Version:             V1.0
-// Descriptions:        arp½ÓÊÕÄ£¿é
+// Descriptions:        arpæ¥æ”¶æ¨¡å—
 //
 //----------------------------------------------------------------------------------------
 //****************************************************************************************//
 
 module arp_rx(
-    input                  clk          , //Ê±ÖÓĞÅºÅ
-    input                  rst_n        , //¸´Î»ĞÅºÅ£¬µÍµçÆ½ÓĞĞ§
-    input                  gmii_rx_dv   , //GMIIÊäÈëÊı¾İÓĞĞ§ĞÅºÅ
-    input        [7:0]     gmii_rxd     , //GMIIÊäÈëÊı¾İ
+    input                  clk          , //æ—¶é’Ÿä¿¡å·
+    input                  rst_n        , //å¤ä½ä¿¡å·ï¼Œä½ç”µå¹³æœ‰æ•ˆ
+    input                  gmii_rx_dv   , //GMIIè¾“å…¥æ•°æ®æœ‰æ•ˆä¿¡å·
+    input        [7:0]     gmii_rxd     , //GMIIè¾“å…¥æ•°æ®
 
-    output  reg            arp_rx_done  , //ARP½ÓÊÕÍê³ÉĞÅºÅ
-    output  reg            arp_rx_type  , //ARPÊı¾İÀàĞÍ£¬0£ºARPÇëÇó 1£ºARPÓ¦´ğ
-    output  reg  [47:0]    src_mac      , //½ÓÊÕµ½µÄÔ´MACµØÖ·
-    output  reg  [31:0]    src_ip         //½ÓÊÕµ½µÄÔ´IPµØÖ·
+    output  reg            arp_rx_done  , //ARPæ¥æ”¶å®Œæˆä¿¡å·
+    output  reg            arp_rx_type  , //ARPæ•°æ®ç±»å‹ï¼Œ0ï¼šARPè¯·æ±‚ 1ï¼šARPåº”ç­”
+    output  reg  [47:0]    src_mac      , //æ¥æ”¶åˆ°çš„æºMACåœ°å€
+    output  reg  [31:0]    src_ip         //æ¥æ”¶åˆ°çš„æºIPåœ°å€
     );
 
 //parameter define
-//¿ª·¢°åµÄMACµØÖ· 00-11-22-33-44-55
+//å¼€å‘æ¿çš„MACåœ°å€ 00-11-22-33-44-55
 parameter BOARD_MAC = 48'h00_11_22_33_44_55;
-//¿ª·¢°åµÄIPµØÖ· 192.168.1.10
+//å¼€å‘æ¿çš„IPåœ°å€ 192.168.1.10
 parameter BOARD_IP  = {8'd192,8'd168,8'd1,8'd10};
 
 //localparam define
@@ -41,20 +41,20 @@ localparam st_eth_head = 5'b0_0100;
 localparam st_arp_data = 5'b0_1000;
 localparam st_rx_end   = 5'b1_0000;
 
-//ÒÔÌ«ÍøARPµÄĞ­ÒéÀàĞÍ
+//ä»¥å¤ªç½‘ARPçš„åè®®ç±»å‹
 parameter ETH_TYPE_ARP = 16'h0806;
 
 //reg define
 reg  [4:0]   cur_state    ;
 reg  [4:0]   next_state   ;
 
-reg  [4:0]   rx_cnt       ; //½âÎöÊı¾İ¼ÆÊıÆ÷
-reg  [47:0]  des_mac_temp ; //½ÓÊÕµ½µÄÄ¿µÄMACµØÖ·
-reg  [31:0]  des_ip_temp  ; //½ÓÊÕµ½µÄÄ¿µÄIPµØÖ·
-reg  [47:0]  src_mac_temp ; //½ÓÊÕµ½µÄÔ´MACµØÖ·
-reg  [31:0]  src_ip_temp  ; //½ÓÊÕµ½µÄÔ´IPµØÖ·
-reg  [15:0]  eth_type     ; //ÒÔÌ«ÍøÀàĞÍ
-reg  [15:0]  op_code      ; //²Ù×÷Âë
+reg  [4:0]   rx_cnt       ; //è§£ææ•°æ®è®¡æ•°å™¨
+reg  [47:0]  des_mac_temp ; //æ¥æ”¶åˆ°çš„ç›®çš„MACåœ°å€
+reg  [31:0]  des_ip_temp  ; //æ¥æ”¶åˆ°çš„ç›®çš„IPåœ°å€
+reg  [47:0]  src_mac_temp ; //æ¥æ”¶åˆ°çš„æºMACåœ°å€
+reg  [31:0]  src_ip_temp  ; //æ¥æ”¶åˆ°çš„æºIPåœ°å€
+reg  [15:0]  eth_type     ; //ä»¥å¤ªç½‘ç±»å‹
+reg  [15:0]  op_code      ; //æ“ä½œç 
 
 //wire define
 wire         des_mac_match  ;
@@ -64,12 +64,12 @@ wire         eth_type_match ;
 //**                    main code
 //*****************************************************
 
-//ÅĞ¶Ï½ÓÊÕµ½µÄÄ¿µÄMACµØÖ·ÊÇ²»ÊÇ¿ª·¢°åµÄ»òÕß¹«¹²MACµØÖ·
+//åˆ¤æ–­æ¥æ”¶åˆ°çš„ç›®çš„MACåœ°å€æ˜¯ä¸æ˜¯å¼€å‘æ¿çš„æˆ–è€…å…¬å…±MACåœ°å€
 assign des_mac_match = (des_mac_temp == BOARD_MAC) || (des_mac_temp == 48'hff_ff_ff_ff_ff_ff);
-//ÅĞ¶ÏÒÔÌ«ÍøµÄĞ­ÒéÀàĞÍÊÇ²»ÊÇARP
+//åˆ¤æ–­ä»¥å¤ªç½‘çš„åè®®ç±»å‹æ˜¯ä¸æ˜¯ARP
 assign eth_type_match = (eth_type[15:8] == ETH_TYPE_ARP[15:8]) && (gmii_rxd == ETH_TYPE_ARP[7:0]);
 
-//µÚÒ»¶Î×´Ì¬»ú:Í¬²½Ê±ĞòÃèÊö×´Ì¬×ªÒÆ
+//ç¬¬ä¸€æ®µçŠ¶æ€æœº:åŒæ­¥æ—¶åºæè¿°çŠ¶æ€è½¬ç§»
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) 
         cur_state <= st_idle;
@@ -77,17 +77,17 @@ always @(posedge clk or negedge rst_n) begin
         cur_state <= next_state;
 end
 
-//µÚ¶ş¶Î×´Ì¬»ú:×éºÏÂß¼­ÅĞ¶Ï×´Ì¬×ªÒÆÌõ¼ş
+//ç¬¬äºŒæ®µçŠ¶æ€æœº:ç»„åˆé€»è¾‘åˆ¤æ–­çŠ¶æ€è½¬ç§»æ¡ä»¶
 always @(*) begin
     next_state = st_idle;
     case(cur_state)
-        st_idle : begin             //¼ì²âµ½µÚÒ»¸ö8'h55
+        st_idle : begin             //æ£€æµ‹åˆ°ç¬¬ä¸€ä¸ª8'h55
             if((gmii_rx_dv == 1'b1) && (gmii_rxd == 8'h55))
                 next_state = st_preamble;
             else
                 next_state = st_idle;
         end
-        st_preamble : begin         //½ÓÊÕÇ°µ¼Âë
+        st_preamble : begin         //æ¥æ”¶å‰å¯¼ç 
             if(gmii_rx_dv) begin
                 if((rx_cnt <= 5'd6) && (gmii_rxd == 8'h55))
                     next_state = st_preamble;
@@ -99,10 +99,10 @@ always @(*) begin
             else
                 next_state = st_rx_end;
         end
-        st_eth_head : begin         //½ÓÊÕÒÔÌ«ÍøÖ¡Í·
+        st_eth_head : begin         //æ¥æ”¶ä»¥å¤ªç½‘å¸§å¤´
             if(gmii_rx_dv) begin
                 if(rx_cnt == 5'd13) begin
-                    //ÅĞ¶ÏMACµØÖ·ÊÇ·ñÎª¿ª·¢°åMACµØÖ·»òÕß¹«¹²MACµØÖ·
+                    //åˆ¤æ–­MACåœ°å€æ˜¯å¦ä¸ºå¼€å‘æ¿MACåœ°å€æˆ–è€…å…¬å…±MACåœ°å€
                     if((des_mac_match == 1'b1) && (eth_type_match == 1'b1))
                         next_state = st_arp_data;
                     else
@@ -114,7 +114,7 @@ always @(*) begin
             else
                 next_state = st_rx_end;
         end
-        st_arp_data : begin         //½ÓÊÕARPÊı¾İ
+        st_arp_data : begin         //æ¥æ”¶ARPæ•°æ®
             if(gmii_rx_dv) begin
                 if(rx_cnt == 5'd28)
                     next_state = st_rx_end;
@@ -124,7 +124,7 @@ always @(*) begin
             else
                 next_state = st_rx_end;
         end
-        st_rx_end : begin           //½ÓÊÕ½áÊø
+        st_rx_end : begin           //æ¥æ”¶ç»“æŸ
             if(gmii_rx_dv == 1'b0)
                 next_state = st_idle;
             else
@@ -134,7 +134,7 @@ always @(*) begin
     endcase
 end
 
-//µÚÈı¶Î×´Ì¬»ú:Ê±ĞòµçÂ·ÃèÊö×´Ì¬Êä³ö,½âÎöÒÔÌ«ÍøÊı¾İ
+//ç¬¬ä¸‰æ®µçŠ¶æ€æœº:æ—¶åºç”µè·¯æè¿°çŠ¶æ€è¾“å‡º,è§£æä»¥å¤ªç½‘æ•°æ®
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         rx_cnt       <= 5'd0 ;
@@ -171,9 +171,9 @@ always @(posedge clk or negedge rst_n) begin
                 if(gmii_rx_dv) begin
                     rx_cnt <= rx_cnt + 5'd1;
                     if((rx_cnt >= 5'd0) && (rx_cnt <= 5'd5))
-                        des_mac_temp <= {des_mac_temp[39:0],gmii_rxd};  //Ä¿µÄMACµØÖ·
+                        des_mac_temp <= {des_mac_temp[39:0],gmii_rxd};  //ç›®çš„MACåœ°å€
                     else if(rx_cnt == 5'd12)
-                        eth_type[15:8] <= gmii_rxd;                     //ÒÔÌ«ÍøĞ­ÒéÀàĞÍ
+                        eth_type[15:8] <= gmii_rxd;                     //ä»¥å¤ªç½‘åè®®ç±»å‹
                     else if(rx_cnt == 5'd13) begin
                         eth_type[7:0] <= gmii_rxd;
                         rx_cnt        <= 5'd0;
@@ -186,26 +186,26 @@ always @(posedge clk or negedge rst_n) begin
                 if(gmii_rx_dv) begin
                     rx_cnt <= rx_cnt + 5'd1;
                     if(rx_cnt == 5'd6)
-                        op_code[15:8] <= gmii_rxd;                      //²Ù×÷Âë
+                        op_code[15:8] <= gmii_rxd;                      //æ“ä½œç 
                     else if(rx_cnt == 5'd7)
                         op_code[7:0] <= gmii_rxd;
                     else if((rx_cnt >= 5'd8) && (rx_cnt < 5'd14))
-                        src_mac_temp <= {src_mac_temp[39:0],gmii_rxd};  //Ô´MACµØÖ·
+                        src_mac_temp <= {src_mac_temp[39:0],gmii_rxd};  //æºMACåœ°å€
                     else if((rx_cnt >= 5'd14) && (rx_cnt < 5'd18))
-                        src_ip_temp <= {src_ip_temp[23:0],gmii_rxd};    //Ô´IPµØÖ·
+                        src_ip_temp <= {src_ip_temp[23:0],gmii_rxd};    //æºIPåœ°å€
                     else if((rx_cnt >= 5'd24) && (rx_cnt < 5'd28))
-                        des_ip_temp <= {des_ip_temp[23:0],gmii_rxd};    //Ä¿±êIPµØÖ·
+                        des_ip_temp <= {des_ip_temp[23:0],gmii_rxd};    //ç›®æ ‡IPåœ°å€
                     else if(rx_cnt == 5'd28) begin
                         rx_cnt <= 5'd0;
-                        //ÅĞ¶ÏÄ¿µÄIPµØÖ·ÊÇ²»ÊÇ¿ª·¢°åµÄIPµØÖ·
+                        //åˆ¤æ–­ç›®çš„IPåœ°å€æ˜¯ä¸æ˜¯å¼€å‘æ¿çš„IPåœ°å€
                         if(des_ip_temp == BOARD_IP) begin
                             if((op_code == 16'd1) || (op_code == 16'd2)) begin
                                 arp_rx_done <= 1'b1;
                                 src_mac     <= src_mac_temp;
                                 src_ip      <= src_ip_temp;
-                                if(op_code == 16'd1)   //ARPÇëÇó
+                                if(op_code == 16'd1)   //ARPè¯·æ±‚
                                     arp_rx_type <= 1'b0;
-                                else                   //ARPÓ¦´ğ
+                                else                   //ARPåº”ç­”
                                     arp_rx_type <= 1'b1;
                             end
                             else;

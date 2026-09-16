@@ -1,41 +1,41 @@
 //****************************************Copyright (c)***********************************//
-//Ô­×Ó¸çÔÚÏß½ÌÑ§Æ½Ì¨£ºwww.yuanzige.com
-//¼¼ÊõÖ§³Ö£ºhttp://www.openedv.com/forum.php
-//ÌÔ±¦µêÆÌ£ºhttps://zhengdianyuanzi.tmall.com
-//¹Ø×¢Î¢ĞÅ¹«ÖÚÆ½Ì¨Î¢ĞÅºÅ£º"ÕıµãÔ­×Ó"£¬Ãâ·Ñ»ñÈ¡ZYNQ & FPGA & STM32 & LINUX×ÊÁÏ¡£
-//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ÕıµãÔ­×Ó 2023-2033
+//åŸå­å“¥åœ¨çº¿æ•™å­¦å¹³å°ï¼šwww.yuanzige.com
+//æŠ€æœ¯æ”¯æŒï¼šhttp://www.openedv.com/forum.php
+//æ·˜å®åº—é“ºï¼šhttps://zhengdianyuanzi.tmall.com
+//å…³æ³¨å¾®ä¿¡å…¬ä¼—å¹³å°å¾®ä¿¡å·ï¼š"æ­£ç‚¹åŸå­"ï¼Œå…è´¹è·å–ZYNQ & FPGA & STM32 & LINUXèµ„æ–™ã€‚
+//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
+//Copyright(C) æ­£ç‚¹åŸå­ 2023-2033
 //All rights reserved
 //----------------------------------------------------------------------------------------
 // File name:           crc32_d8
-// Created by:          ÕıµãÔ­×Ó
-// Created date:        2025Äê10ÔÂ13ÈÕ09:40:02
+// Created by:          æ­£ç‚¹åŸå­
+// Created date:        2025å¹´10æœˆ13æ—¥09:40:02
 // Version:             V1.0
-// Descriptions:        CRC32Ğ£ÑéÄ£¿é
+// Descriptions:        CRC32æ ¡éªŒæ¨¡å—
 //
 //----------------------------------------------------------------------------------------
 //****************************************************************************************//
 
 module crc32_d8(
-    input                 clk     ,  //Ê±ÖÓĞÅºÅ
-    input                 rst_n   ,  //¸´Î»ĞÅºÅ£¬µÍµçÆ½ÓĞĞ§
-    input         [7:0]   data    ,  //ÊäÈë´ıĞ£Ñé8Î»Êı¾İ
-    input                 crc_en  ,  //crcÊ¹ÄÜ£¬¿ªÊ¼Ğ£Ñé±êÖ¾
-    input                 crc_clr ,  //crcÊı¾İ¸´Î»ĞÅºÅ
-    output   reg  [31:0]  crc_data,  //CRCĞ£ÑéÊı¾İ
-    output        [31:0]  crc_next   //CRCÏÂ´ÎĞ£ÑéÍê³ÉÊı¾İ
+    input                 clk     ,  //æ—¶é’Ÿä¿¡å·
+    input                 rst_n   ,  //å¤ä½ä¿¡å·ï¼Œä½ç”µå¹³æœ‰æ•ˆ
+    input         [7:0]   data    ,  //è¾“å…¥å¾…æ ¡éªŒ8ä½æ•°æ®
+    input                 crc_en  ,  //crcä½¿èƒ½ï¼Œå¼€å§‹æ ¡éªŒæ ‡å¿—
+    input                 crc_clr ,  //crcæ•°æ®å¤ä½ä¿¡å·
+    output   reg  [31:0]  crc_data,  //CRCæ ¡éªŒæ•°æ®
+    output        [31:0]  crc_next   //CRCä¸‹æ¬¡æ ¡éªŒå®Œæˆæ•°æ®
     );
 
 //*****************************************************
 //**                    main code
 //*****************************************************
 
-//ÊäÈë´ıĞ£Ñé8Î»Êı¾İ,ĞèÒªÏÈ½«¸ßµÍÎ»»¥»»
+//è¾“å…¥å¾…æ ¡éªŒ8ä½æ•°æ®,éœ€è¦å…ˆå°†é«˜ä½ä½äº’æ¢
 wire    [7:0]  data_t;
 
 assign data_t = {data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]};
 
-//CRC32µÄÉú³É¶àÏîÊ½Îª£ºG(x)= x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11 
+//CRC32çš„ç”Ÿæˆå¤šé¡¹å¼ä¸ºï¼šG(x)= x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11 
 //+ x^10 + x^8 + x^7 + x^5 + x^4 + x^2 + x^1 + 1
 
 assign crc_next[0] = crc_data[24] ^ crc_data[30] ^ data_t[0] ^ data_t[6];
@@ -107,7 +107,7 @@ assign crc_next[31] = crc_data[23] ^ crc_data[29] ^ data_t[5];
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)
         crc_data <= 32'hff_ff_ff_ff;
-    else if(crc_clr)                    //CRCĞ£ÑéÖµ¸´Î»
+    else if(crc_clr)                    //CRCæ ¡éªŒå€¼å¤ä½
         crc_data <= 32'hff_ff_ff_ff;
     else if(crc_en)
         crc_data <= crc_next;

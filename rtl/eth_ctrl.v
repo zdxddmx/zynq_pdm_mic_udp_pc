@@ -1,55 +1,55 @@
 //****************************************Copyright (c)***********************************//
-//Ô­×Ó¸çÔÚÏß½ÌÑ§Æ½Ì¨£ºwww.yuanzige.com
-//¼¼ÊõÖ§³Ö£ºhttp://www.openedv.com/forum.php
-//ÌÔ±¦µêÆÌ£ºhttps://zhengdianyuanzi.tmall.com
-//¹Ø×¢Î¢ĞÅ¹«ÖÚÆ½Ì¨Î¢ĞÅºÅ£º"ÕıµãÔ­×Ó"£¬Ãâ·Ñ»ñÈ¡ZYNQ & FPGA & STM32 & LINUX×ÊÁÏ¡£
-//°æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿¡£
-//Copyright(C) ÕıµãÔ­×Ó 2023-2033
+//åŸå­å“¥åœ¨çº¿æ•™å­¦å¹³å°ï¼šwww.yuanzige.com
+//æŠ€æœ¯æ”¯æŒï¼šhttp://www.openedv.com/forum.php
+//æ·˜å®åº—é“ºï¼šhttps://zhengdianyuanzi.tmall.com
+//å…³æ³¨å¾®ä¿¡å…¬ä¼—å¹³å°å¾®ä¿¡å·ï¼š"æ­£ç‚¹åŸå­"ï¼Œå…è´¹è·å–ZYNQ & FPGA & STM32 & LINUXèµ„æ–™ã€‚
+//ç‰ˆæƒæ‰€æœ‰ï¼Œç›—ç‰ˆå¿…ç©¶ã€‚
+//Copyright(C) æ­£ç‚¹åŸå­ 2023-2033
 //All rights reserved                              
 //----------------------------------------------------------------------------------------
 // File name:           eth_ctrl
 // Last modified Date:  2020/2/18 9:20:14
 // Last Version:        V1.0
-// Descriptions:        ÒÔÌ«Íø¿ØÖÆÄ£¿é
+// Descriptions:        ä»¥å¤ªç½‘æ§åˆ¶æ¨¡å—
 //
 //----------------------------------------------------------------------------------------
 //****************************************************************************************//
 
 module eth_ctrl(
-    input              clk             , //ÏµÍ³Ê±ÖÓ
-    input              rst_n           , //ÏµÍ³¸´Î»ĞÅºÅ£¬µÍµçÆ½ÓĞĞ§ 
-    //ARPÏà¹Ø¶Ë¿ÚĞÅºÅ                                   
-    input              arp_rx_done     , //ARP½ÓÊÕÍê³ÉĞÅºÅ
-    input              arp_rx_type     , //ARP½ÓÊÕÀàĞÍ 0:ÇëÇó  1:Ó¦´ğ
-    output  reg        arp_tx_en       , //ARP·¢ËÍÊ¹ÄÜĞÅºÅ
-    output             arp_tx_type     , //ARP·¢ËÍÀàĞÍ 0:ÇëÇó  1:Ó¦´ğ
-    input              arp_tx_done     , //ARP·¢ËÍÍê³ÉĞÅºÅ
-    input              arp_gmii_tx_en  , //ARP GMIIÊä³öÊı¾İÓĞĞ§ĞÅºÅ 
-    input     [7:0]    arp_gmii_txd,     //ARP GMIIÊä³öÊı¾İ
-    //UDPÏà¹Ø¶Ë¿ÚĞÅºÅ
-    input              udp_tx_start_en , //UDP¿ªÊ¼·¢ËÍĞÅºÅ
-    input              udp_tx_done     , //UDP·¢ËÍÍê³ÉĞÅºÅ
-    input              udp_gmii_tx_en  , //UDP GMIIÊä³öÊı¾İÓĞĞ§ĞÅºÅ  
-    input     [7:0]    udp_gmii_txd    , //UDP GMIIÊä³öÊı¾İ   
-    //GMII·¢ËÍÒı½Å                     
-    output             gmii_tx_en      , //GMIIÊä³öÊı¾İÓĞĞ§ĞÅºÅ 
-    output    [7:0]    gmii_txd          //UDP GMIIÊä³öÊı¾İ 
+    input              clk             , //ç³»ç»Ÿæ—¶é’Ÿ
+    input              rst_n           , //ç³»ç»Ÿå¤ä½ä¿¡å·ï¼Œä½ç”µå¹³æœ‰æ•ˆ 
+    //ARPç›¸å…³ç«¯å£ä¿¡å·                                   
+    input              arp_rx_done     , //ARPæ¥æ”¶å®Œæˆä¿¡å·
+    input              arp_rx_type     , //ARPæ¥æ”¶ç±»å‹ 0:è¯·æ±‚  1:åº”ç­”
+    output  reg        arp_tx_en       , //ARPå‘é€ä½¿èƒ½ä¿¡å·
+    output             arp_tx_type     , //ARPå‘é€ç±»å‹ 0:è¯·æ±‚  1:åº”ç­”
+    input              arp_tx_done     , //ARPå‘é€å®Œæˆä¿¡å·
+    input              arp_gmii_tx_en  , //ARP GMIIè¾“å‡ºæ•°æ®æœ‰æ•ˆä¿¡å· 
+    input     [7:0]    arp_gmii_txd,     //ARP GMIIè¾“å‡ºæ•°æ®
+    //UDPç›¸å…³ç«¯å£ä¿¡å·
+    input              udp_tx_start_en , //UDPå¼€å§‹å‘é€ä¿¡å·
+    input              udp_tx_done     , //UDPå‘é€å®Œæˆä¿¡å·
+    input              udp_gmii_tx_en  , //UDP GMIIè¾“å‡ºæ•°æ®æœ‰æ•ˆä¿¡å·  
+    input     [7:0]    udp_gmii_txd    , //UDP GMIIè¾“å‡ºæ•°æ®   
+    //GMIIå‘é€å¼•è„š                     
+    output             gmii_tx_en      , //GMIIè¾“å‡ºæ•°æ®æœ‰æ•ˆä¿¡å· 
+    output    [7:0]    gmii_txd          //UDP GMIIè¾“å‡ºæ•°æ® 
     );
 
 //reg define
-reg        protocol_sw; //Ğ­ÒéÇĞ»»ĞÅºÅ
-reg        udp_tx_busy; //UDPÕıÔÚ·¢ËÍÊı¾İ±êÖ¾ĞÅºÅ
-reg        arp_rx_flag; //½ÓÊÕµ½ARPÇëÇóĞÅºÅµÄ±êÖ¾
+reg        protocol_sw; //åè®®åˆ‡æ¢ä¿¡å·
+reg        udp_tx_busy; //UDPæ­£åœ¨å‘é€æ•°æ®æ ‡å¿—ä¿¡å·
+reg        arp_rx_flag; //æ¥æ”¶åˆ°ARPè¯·æ±‚ä¿¡å·çš„æ ‡å¿—
 
 //*****************************************************
 //**                    main code
 //*****************************************************
 
-assign arp_tx_type = 1'b1;   //ARP·¢ËÍÀàĞÍ¹Ì¶¨ÎªARPÓ¦´ğ                                   
+assign arp_tx_type = 1'b1;   //ARPå‘é€ç±»å‹å›ºå®šä¸ºARPåº”ç­”                                   
 assign gmii_tx_en  = protocol_sw ? udp_gmii_tx_en : arp_gmii_tx_en;
 assign gmii_txd    = protocol_sw ? udp_gmii_txd : arp_gmii_txd;
 
-//¿ØÖÆUDP·¢ËÍÃ¦ĞÅºÅ
+//æ§åˆ¶UDPå‘é€å¿™ä¿¡å·
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)
         udp_tx_busy <= 1'b0;
@@ -59,7 +59,7 @@ always @(posedge clk or negedge rst_n) begin
         udp_tx_busy <= 1'b0;
 end
 
-//¿ØÖÆ½ÓÊÕµ½ARPÇëÇóĞÅºÅµÄ±êÖ¾
+//æ§åˆ¶æ¥æ”¶åˆ°ARPè¯·æ±‚ä¿¡å·çš„æ ‡å¿—
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)
         arp_rx_flag <= 1'b0;
@@ -69,7 +69,7 @@ always @(posedge clk or negedge rst_n) begin
         arp_rx_flag <= 1'b0;
 end
 
-//¿ØÖÆprotocol_swºÍarp_tx_enĞÅºÅ
+//æ§åˆ¶protocol_swå’Œarp_tx_enä¿¡å·
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         protocol_sw <= 1'b0;
