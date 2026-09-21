@@ -1,26 +1,27 @@
 # 基于 ZYNQ 的 PDM 麦克风阵列 UDP 音频流系统
 
-> 在 Xilinx Zynq-7020 FPGA 上实现 PDM 数字麦克风采集 → CIC 抽取滤波 → 千兆以太网 UDP 实时音频流传输，配套 Python 上位机接收并显示波形。
+> 毕业设计《基于 ZYNQ 平台的 16 路麦克风阵列声源定位系统》的采集与传输链路。
+> 在 Xilinx Zynq-7020 上实现 PDM 数字麦克风采集 → 三级 CIC 抽取滤波 → 千兆以太网 UDP 实时音频流传输，配套 Python 上位机接收并显示波形。
 
 ## 技术栈
 
 | 分类 | 技术 | 说明 |
 |---|---|---|
-| **FPGA 芯片** | Xilinx Zynq-7020（`xc7z020clg400-2`） | 本项目仅使用 PL 逻辑，未启用 PS |
-| **开发语言** | Verilog HDL | 全部 RTL 手写，无 HLS |
+| **FPGA 芯片** | Xilinx Zynq-7020（`xc7z020clg400-2`） | 采集与传输链路使用 PL 逻辑实现 |
+| **开发语言** | Verilog HDL | RTL 手写，无 HLS |
 | **开发工具** | Vivado 2020.2 | 综合 / 实现 / 烧录 |
 | **仿真工具** | ModelSim | UDP 收发链路功能仿真（`sim/tb/tb_udp.v`） |
 | **FPGA IP 核** | `async_fifo_2048x8b`、`clk_wiz_0` | 异步 FIFO 数据缓冲 + 时钟向导 |
-| **网络协议** | 以太网 MAC（RGMII）/ ARP / UDP / IPv4 | 轻量协议栈全手写，无软核 CPU |
-| **数字信号处理** | PDM 解调 + CIC 抽取滤波器 | 64 倍抽取，含可调移位增益 |
+| **网络协议** | 以太网 MAC（RGMII）/ ARP / UDP / IPv4 | 轻量协议栈，无软核 CPU |
+| **数字信号处理** | PDM 解调 + 三级 CIC 抽取滤波器 | 64 倍抽取，含可调移位增益 |
 | **上位机** | Python 3（纯标准库：`argparse`/`socket`） | UDP 接收 + 波形显示 |
-| **约束文件** | XDC（LVCMOS33） | 麦克风 IO：`W19`/`Y17`；LED：`H15`/`L15` |
+| **约束文件** | XDC（LVCMOS33） | 麦克风：`mic_clk` = W19，`mic_data` = P16；LED：H15 / L15 |
 
 ## 系统架构
 
 ```
 PDM 麦克风 ──mic_clk/mic_data──> pdm_mic_pcm ──PCM16──> ad_udp_pc(TOP)
-   (W19/Y17)     2.083 MHz       (CIC 64x 抽取)            │
+   (W19/P16)     2.083 MHz       (CIC 64x 抽取)            │
                                                            │
                     ┌──────────────────────────────────────┤
                     │                                      │
@@ -46,7 +47,7 @@ PDM 麦克风 ──mic_clk/mic_data──> pdm_mic_pcm ──PCM16──> ad_ud
 | UDP 端口 | `1234` |
 | 本地 MAC | `48'h0123456789ab` |
 | PDM 时钟 | 2.083 MHz（50 MHz / 24） |
-| CIC 抽取比 | 64 |
+| CIC 抽取比 | 64（三级） |
 | PCM 采样率 | ≈ 32.55 kHz |
 | PCM 格式 | 16-bit 有符号小端 |
 | 包格式 | 1200 字节 / 包（600 采样点） |
@@ -59,7 +60,7 @@ PDM 麦克风 ──mic_clk/mic_data──> pdm_mic_pcm ──PCM16──> ad_ud
 ├── rtl/                      # Verilog 源码
 │   ├── ad_udp_pc.v           # 顶层模块
 │   ├── eth_top.v / eth_ctrl.v# 以太网 MAC 控制
-│   ├── pdm_mic_pcm.v         # PDM 解码 + CIC 滤波
+│   ├── pdm_mic_pcm.v         # PDM 解码 + 三级 CIC 滤波
 │   ├── fake_audio_gen.v      # 内部测试波形源
 │   ├── ad1030_10bit_to_16bit.v # 10-bit ADC 数据扩展
 │   ├── img_data_pkt.v        # 图像数据打包（预留）
@@ -74,18 +75,9 @@ PDM 麦克风 ──mic_clk/mic_data──> pdm_mic_pcm ──PCM16──> ad_ud
 └── README.md
 ```
 
-## 项目现状与诚实边界
+## 第三方代码声明
 
-本仓库当前是**单路 PDM 麦克风采集传输链路**的工程实现，不是 16 路阵列声源定位系统的整机交付。如实区分如下：
-
-| 状态 | 内容 |
-|---|---|
-| ✅ 已实现（代码可复核） | PDM 解码 + 3 级 CIC 64 倍抽取（32.55 kHz / 16-bit PCM）；UDP/ARP/RGMII 千兆以太网传输链路集成；自研 Python 上位机波形显示；参数化调试体系（伪音源 / 密度诊断 / 增益调节）；ModelSim 仿真 TB |
-| ⚠️ 缺实测证据 | 仓库暂无实机运行照片、示波器截图或视频；请补充硬件验证证据后再对外宣称"实测通过" |
-| 📋 规划中（未实现） | 16 路 PDM MEMS 圆环阵列并行采集、FFT / 波束形成、声压热力图、摄像头 Alpha 融合、多麦克风时钟同步 |
-| 📌 第三方代码声明 | `rtl/udp/`、`rtl/arp/`、`rtl/eth_top.v` 等以太网模块基于**正点原子教学平台**代码（文件头保留版权声明）；自研部分为 `pdm_mic_pcm.v`（PDM/CIC 信号链）、顶层集成、上位机、仿真与文档 |
-
-> 面试/汇报口径：已完成的成果以"单路 PDM→CIC→UDP 全链路 + 上位机"为界；16 路阵列与波束形成属于毕设后续规划，不对外描述为已完成。详细状态见 [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md)。
+`rtl/udp/`、`rtl/arp/`、`rtl/eth_top.v` 等以太网模块基于**正点原子教学平台**代码，文件头保留原版权声明；自研部分为 `pdm_mic_pcm.v`（PDM 解调与三级 CIC 信号链）、顶层集成、Python 上位机、仿真与文档。
 
 ## 快速上手
 
@@ -107,7 +99,7 @@ python .\udp_wave_viewer.py --board-ip 192.168.1.10 --listen-port 1234 --sample-
 - 上位机显示 `packets=0`：先把 `USE_FAKE_AUDIO` 置 1 验证以太网通路，再切回麦克风；
 - `USE_FAKE_AUDIO=1` 正常但真麦克风无波形：置 `MIC_OUTPUT_DENSITY=1` 观察 PDM 密度——平线说明 `mic_data` 引脚悬空/焊错/麦克风未供电；
 - 波形削顶或过小：调整 `rtl/ad_udp_pc.v` 中 `CIC_SHIFT`；
-- 时钟异常：量测 `W19` 应为 2.083 MHz；LED0（`H15`）心跳表示 PLL 正常。
+- 时钟异常：量测 W19 应为 2.083 MHz；LED0（H15）心跳表示 PLL 正常。
 
 ## 安全说明
 
